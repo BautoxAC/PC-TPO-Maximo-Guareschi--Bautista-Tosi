@@ -1,4 +1,4 @@
-package Objetos;
+
 
 public interface Atraccion {
     
