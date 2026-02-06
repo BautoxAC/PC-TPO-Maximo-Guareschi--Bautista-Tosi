@@ -1,8 +1,10 @@
 package Hilos;
 
+
 import java.util.Random;
 
 import Objetos.*;
+
 
 public class Visitante implements Runnable {
 

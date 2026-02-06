@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import Objetos.*;
+import Objetos.Atraccion;
 
 public class MontaniaRusa implements Atraccion {
 

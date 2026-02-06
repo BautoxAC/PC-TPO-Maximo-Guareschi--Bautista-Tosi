@@ -1,4 +1,5 @@
-import Hilos.TrenMontaniaRusa;
+package Test;
+
 import Hilos.Visitante;
 import Objetos.Parque;
 import java.util.concurrent.ExecutorService;
