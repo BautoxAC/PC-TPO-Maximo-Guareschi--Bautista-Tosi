@@ -7,6 +7,12 @@ public interface Atraccion {
 
     public void salir();
 
+    public void cerrarActividad();
+
+    public boolean estaAbierta();
+
     public String obtenerTipoFichas();
+
+
 
 }

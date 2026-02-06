@@ -20,10 +20,10 @@ public class Main {
             
             Thread.sleep(10 + (int)(Math.random() * 700));
             
-            if (i == 30) {
-                parque.cerrarParque();
-            }
+            
         }
+
+        Thread.sleep(3000);
 
          Thread.sleep(100 + (int)(Math.random() * 700));
             

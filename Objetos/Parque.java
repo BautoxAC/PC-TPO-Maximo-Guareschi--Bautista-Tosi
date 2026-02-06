@@ -27,10 +27,10 @@ public class Parque {
 
         atracciones = new Atraccion[6];
         atracciones[0] = new MontaniaRusa();
+        atracciones[1] = new AutitosChocadores();
 
         TrenMontaniaRusa trenMontaniaRusa = new TrenMontaniaRusa((MontaniaRusa) atracciones[0]);
         new Thread(trenMontaniaRusa).start();
-
 
     }
 
@@ -100,7 +100,12 @@ public class Parque {
 
     public void cerrarActividades() {
         System.out.println("=== ACTIVIDADES CERRANDO (19:00) ===");
-        // montaniaRusa.cerrar();
+        
+        for (int i = 0; i < atracciones.length; i++) {
+            if (atracciones[i] != null) {
+                atracciones[i].cerrarActividad();
+            } 
+        }
 
     }
 

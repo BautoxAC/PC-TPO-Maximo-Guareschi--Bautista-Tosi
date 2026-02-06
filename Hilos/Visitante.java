@@ -1,10 +1,8 @@
 package Hilos;
 
-
 import java.util.Random;
 
 import Objetos.*;
-
 
 public class Visitante implements Runnable {
 
@@ -75,8 +73,10 @@ public class Visitante implements Runnable {
 
         decision = random.nextInt(10) + 1;
 
-        if (decision > 3) {
+        if (decision > 100) {
             actividad = "MR";
+        } else if (decision > 1) {
+            actividad = "AC";
         } else {
             actividad = "Salir";
         }
@@ -111,7 +111,6 @@ public class Visitante implements Runnable {
 
                     }
 
-                    
                 } else {
                     enParque = false;
                 }
@@ -136,7 +135,7 @@ public class Visitante implements Runnable {
 
             if (pudoEntrar) {
 
-                //System.out.println("entro");
+                // System.out.println("entro");
 
                 realizarActividades();
 

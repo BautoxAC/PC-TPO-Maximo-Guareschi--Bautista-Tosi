@@ -20,6 +20,8 @@ public class MontaniaRusa implements Atraccion {
 
     private int cantEsperando;
 
+    private boolean actividadAbierta;
+
     public MontaniaRusa() {
 
         barreraInicio = new CyclicBarrier(5, () -> {
@@ -40,6 +42,8 @@ public class MontaniaRusa implements Atraccion {
         mutex = new Semaphore(1);
 
         cantEsperando = 0;
+
+        actividadAbierta = true;
     
     }
 
@@ -65,6 +69,12 @@ public class MontaniaRusa implements Atraccion {
 
     }
 
+    private void manejarFaltaDeGente() {
+
+        lugares.release();
+
+    }
+
     public boolean entrar() {
 
         boolean gano = false;
@@ -73,7 +83,7 @@ public class MontaniaRusa implements Atraccion {
 
             mutex.acquire();
 
-            if (cantEsperando < 5) {
+            if (cantEsperando < 5 && actividadAbierta) {
 
                 cantEsperando++;
 
@@ -91,9 +101,12 @@ public class MontaniaRusa implements Atraccion {
             mutex.release();
 
         } catch (TimeoutException time) {
-            gano = false;
+
+            manejarFaltaDeGente();
+
         } catch (BrokenBarrierException time) {
-            gano = false;
+
+            manejarFaltaDeGente();
         
         } catch (Exception e) {
             System.out.println(e);
@@ -113,6 +126,20 @@ public class MontaniaRusa implements Atraccion {
             System.out.println(e);
         }
 
+    }
+
+    public void cerrarActividad() {
+        try {
+            mutex.acquire();
+            actividadAbierta = false;
+            mutex.release();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public boolean estaAbierta() {
+        return actividadAbierta;
     }
 
     public String obtenerTipoFichas() {
