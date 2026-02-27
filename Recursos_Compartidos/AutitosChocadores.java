@@ -1,136 +1,120 @@
 package Recursos_Compartidos;
 
 import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 import Objetos.Atraccion;
 
 public class AutitosChocadores implements Atraccion {
 
-    private CountDownLatch contador;
+    private static final int CAPACIDAD = 20;
 
-    private Semaphore mutex;
-    private Semaphore salida;
+    private ReentrantLock lock;
+    private Condition hayLugar;
+    private Condition encargado;
 
-    private boolean iniciado;
+    private int esperando;
+    private boolean enCurso;
 
-    private int[] lugaresAutos;
-    private int lugaresDisponibles;
+    private CyclicBarrier inicio;
+    private CyclicBarrier fin;
 
     private boolean actividadAbierta;
 
     public AutitosChocadores() {
 
-        contador = new CountDownLatch(1);
+        lock = new ReentrantLock();
+        hayLugar = lock.newCondition();
+        encargado = lock.newCondition();
 
-        mutex = new Semaphore(1);
-        salida = new Semaphore(0);
+        esperando = 0;
+        enCurso = false;
+        actividadAbierta = true;
 
-        iniciado = false;
+        inicio = new CyclicBarrier(CAPACIDAD, () -> {
+            System.out.println("Empieza la actividad de los autitos");
+        });
 
-        lugaresAutos = new int[10];
-        lugaresDisponibles = 10;
-
-        actividadAbierta = false;
-
-    }
-
-    private int buscarAutoDisponible() {
-
-        int lugar = -1;
-        int i = 0;
-
-        while (lugar == -1 && i < lugaresAutos.length) {
-            if (lugaresAutos[i] < 2) {
-                lugar = i;
+        fin = new CyclicBarrier(CAPACIDAD + 1, () -> {
+            lock.lock();
+            try {
+                esperando = 0;
+                enCurso = false;
+                hayLugar.signalAll();
+                System.out.println("Termina la actividad de los autitos");
+            } finally {
+                lock.unlock();
             }
-            i++;
-        }
-
-        return lugar;
+        });
 
     }
 
     public boolean entrar() {
 
-        boolean gano = false;
-        int lugar;
-
+        lock.lock();
         try {
 
-            mutex.acquire();
-
-            if (!iniciado) {
-
-                lugar = buscarAutoDisponible();
-
-                System.out.println(lugar);
-
-                if (lugar != -1) {
-
-                    if (lugaresAutos[lugar] == 1) {
-                        lugaresDisponibles--;
-                    }
-                    lugaresAutos[lugar]++;
-
-                    if (lugaresDisponibles == 0) {
-                        System.out.println("EMPIEZA");
-                        iniciado = true;
-                        contador.countDown();
-                        mutex.release();
-                    } else {
-                        mutex.release();
-                        gano = contador.await(60, TimeUnit.SECONDS);
-                        mutex.acquire();
-
-                        if (!gano) {
-                            if (lugar != -1) {
-                                lugaresAutos[lugar]--;
-                                if (lugaresAutos[lugar] == 0) {
-                                    lugaresDisponibles++;
-                                }
-                            }
-                        }
-                        
-                    }
-
+            while (!actividadAbierta || enCurso || esperando == CAPACIDAD) {
+                try {
+                    hayLugar.await(14, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                    return false;
                 }
-
-                else {
-                    System.out.println("NO LUGAR");
-                }
-
-            } else {
-                mutex.release();
             }
 
-        }
-        catch (Exception e) {
-            System.out.println(e);
+            esperando++;
+
+            if (esperando == CAPACIDAD) {
+                enCurso = true;
+                encargado.signalAll();
+            }
+
+        } finally {
+            lock.unlock();
         }
 
-        return gano;
+        try {
+            inicio.await();
+            return true;
+        } catch (InterruptedException | BrokenBarrierException e) {
+            return false;
+        }
+    }
+
+    public void esperarLlenarse() {
+        lock.lock();
+        try {
+            while (!enCurso) {
+                encargado.await();
+            }
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        } finally {
+            lock.unlock();
+        }
 
     }
 
     public void salir() {
-
         try {
-
-            salida.acquire();
-
-        } catch (Exception e) {
+            fin.await();
+        } catch (InterruptedException | BrokenBarrierException e) {
             System.out.println(e);
         }
-
     }
 
     public void cerrarActividad() {
-        salida.release();
+        lock.lock();
+        try {
+            actividadAbierta = false;
+            hayLugar.signalAll();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public boolean estaAbierta() {

@@ -9,6 +9,7 @@ public class Visitante implements Runnable {
     private String nombre;
     private int[] fichas;
     private Parque parque;
+    private int saldo;
 
     private Atraccion atraccion;
 
@@ -19,6 +20,9 @@ public class Visitante implements Runnable {
         this.nombre = nombre;
         this.fichas = new int[4];
         this.parque = parque;
+        this.saldo = 0;
+
+        fichas[1] = 1000;
 
         this.enParque = false;
 
@@ -32,15 +36,23 @@ public class Visitante implements Runnable {
         return fichas[parque.traducirActividad(ficha)];
     }
 
+    public void sacarFichas() {
+        for (int i = 0; i < fichas.length; i++) {
+            fichas[i] = 0;
+        }
+    }
+
     private void agregarFicha(String ficha) {
 
-        fichas[parque.traducirActividad(ficha)]++;
+        int cantidadAAumentar = parque.obtenerValoresFicha(ficha);
+
+        fichas[parque.traducirActividad(ficha)] += cantidadAAumentar;
 
     }
 
     private boolean entrarParque() {
 
-        System.out.println("[" + nombre + "] trata de entrar al parque");
+        System.out.println(nombre + " trata de entrar al parque");
 
         boolean exito = parque.intentarEntrar();
 
@@ -48,11 +60,11 @@ public class Visitante implements Runnable {
 
             if (exito) {
                 System.out.println(nombre + "esta entrado al parque");
-                Thread.sleep(3000);
+                Thread.sleep(300);
                 System.out.println(nombre + "entro al parque");
             } else {
                 System.out.println(nombre
-                        + " no pudo entrar ..................................................... parque cerrado");
+                        + " no pudo entrar ........ parque cerrado");
             }
 
             parque.liberarMolinete();
@@ -65,6 +77,32 @@ public class Visitante implements Runnable {
 
     }
 
+    private boolean tieneFichas() {
+        int cantidadTotal = 0;
+
+        for (int i = 0; i < fichas.length; i++) {
+            cantidadTotal += fichas[i];
+        }
+
+        System.out.println(cantidadTotal);
+
+        return (cantidadTotal > 30 || saldo > 30);
+    }
+
+    private void canjearFichas() {
+
+        saldo += parque.canjearSaldo(this);
+
+        Premio premio = parque.entrarAreaPremios(this);
+
+        if (premio != null) {
+            System.out.println("El visitante "+nombre+" recibio el premio ");
+        }
+
+       
+
+    }
+
     private String elegirActividad() {
 
         String actividad;
@@ -73,6 +111,10 @@ public class Visitante implements Runnable {
 
         decision = random.nextInt(10) + 1;
 
+        if (!parque.estaAbierto()) {
+            decision = 0;
+        }
+
         if (decision > 100) {
             actividad = "MR";
         } else if (decision > 1) {
@@ -80,6 +122,14 @@ public class Visitante implements Runnable {
         } else {
             actividad = "Salir";
         }
+
+        System.out.println(decision);
+        
+        if (tieneFichas()) {
+            actividad = "AreaPremios";
+        }
+
+
 
         return actividad;
 
@@ -97,9 +147,9 @@ public class Visitante implements Runnable {
 
                 actividad = elegirActividad();
 
-                System.out.println("le salio " + actividad);
+                System.out.println(nombre + " ENTRA a la actividad " + actividad);
 
-                if (!actividad.equals("Salir")) {
+                if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) {
                     atraccion = parque.obtenerAtraccion(actividad);
 
                     resultado = atraccion.entrar();
@@ -110,6 +160,10 @@ public class Visitante implements Runnable {
                         agregarFicha(atraccion.obtenerTipoFichas());
 
                     }
+
+                } else if (actividad.equals("AreaPremios")) {
+
+                    canjearFichas();
 
                 } else {
                     enParque = false;
@@ -145,6 +199,14 @@ public class Visitante implements Runnable {
             // TODO: handle exception
         }
 
+    }
+
+    public int obtenerSaldo() {
+        return this.saldo;
+    }
+
+    public void sacarSaldo(int saldo) {
+        this.saldo -= saldo;
     }
 
 }

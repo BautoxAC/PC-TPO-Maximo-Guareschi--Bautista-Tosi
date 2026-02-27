@@ -3,9 +3,9 @@ package Objetos;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+
+import Hilos.*;
 import Recursos_Compartidos.*;
-import Hilos.TrenMontaniaRusa;
-import Hilos.Visitante;
 
 public class Parque {
 
@@ -13,6 +13,7 @@ public class Parque {
     private Semaphore mutexParque;
 
     public Atraccion[] atracciones;
+    public AreaPremios areaPremios;
 
     private boolean parqueAbierto;
     private int hora;
@@ -28,9 +29,18 @@ public class Parque {
         atracciones = new Atraccion[6];
         atracciones[0] = new MontaniaRusa();
         atracciones[1] = new AutitosChocadores();
+        
+        areaPremios = new AreaPremios();
 
         TrenMontaniaRusa trenMontaniaRusa = new TrenMontaniaRusa((MontaniaRusa) atracciones[0]);
         new Thread(trenMontaniaRusa).start();
+
+        EncargadoAutitos encargadoAutos = new EncargadoAutitos((AutitosChocadores) atracciones[1]);
+        new Thread(encargadoAutos).start();
+
+        EncargadoAreaPremios encargadoPremios = new EncargadoAreaPremios(areaPremios);
+        new Thread(encargadoPremios).start();
+
 
     }
 
@@ -147,6 +157,44 @@ public class Parque {
 
         return num;
 
+    }
+
+    public int obtenerValoresFicha(String actividad) {
+
+        int num;
+
+        switch (actividad) {
+            case "MR":
+                num = 3;
+                break;
+            case "AC":
+                num = 4;
+                break;
+            case "RV":
+                num = 3;
+                break;
+            case "CG":
+                num = 4;
+                break;
+            default:
+                num = 1;
+                break;
+        }
+
+        return num;
+
+    }
+
+    public boolean estaAbierto() {
+        return this.parqueAbierto;
+    }
+
+    public int canjearSaldo(Visitante visitante) {
+        return areaPremios.canjearSaldo(visitante);
+    }
+
+    public Premio entrarAreaPremios(Visitante visitante) {
+        return areaPremios.canjear(visitante);
     }
 
 }
