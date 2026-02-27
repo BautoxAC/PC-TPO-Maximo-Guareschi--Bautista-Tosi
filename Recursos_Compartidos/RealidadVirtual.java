@@ -26,8 +26,8 @@ public class RealidadVirtual implements Atraccion {
         for (int i = 0; i < equipo.length; i++) {
             equipo[i] = new ArrayBlockingQueue<String>(capacidades[i]);
         }
-        Semaphore encargado = new Semaphore(0);
-        Semaphore revisar = new Semaphore(0);
+        encargado = new Semaphore(0);
+        revisar = new Semaphore(0);
     }
 
     @Override
