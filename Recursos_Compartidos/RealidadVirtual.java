@@ -35,32 +35,54 @@ public class RealidadVirtual implements Atraccion {
         boolean entro = false;
         try {
             mutex.acquire();
+
             if (cantEsperando < 4) {
+
                 cantEsperando++;
                 mutex.release();
-                String Visor = equipo[0].poll(20, TimeUnit.SECONDS);
+                String Visor = equipo[0].poll(2, TimeUnit.SECONDS);
+
                 if (Visor != null) {
-                    String manopla = equipo[1].poll(20, TimeUnit.SECONDS);
-                    String manopla2 = equipo[1].poll(20, TimeUnit.SECONDS);
+
+                    String manopla = equipo[1].poll(2, TimeUnit.SECONDS);
+                    String manopla2 = equipo[1].poll(2, TimeUnit.SECONDS);
+
                     if (manopla != null && manopla2 != null) {
-                        String base = equipo[2].poll(20, TimeUnit.SECONDS);
+
+                        String base = equipo[2].poll(2, TimeUnit.SECONDS);
+
                         if (base != null) {
+
                             entro = true;
                             this.esperarRevisar();
+
                         } else {
+
                             equipo[0].put("Visor");
-                            if ((manopla != null && manopla2 == null) || (manopla == null && manopla2 != null)) {
-                                equipo[1].put("manopla");
-                            }
+                            equipo[1].put("manopla1");
+                            equipo[1].put("manopla2");
+
                         }
                     } else {
+
                         equipo[0].put("Visor");
+
+                        if ((manopla != null && manopla2 == null) || (manopla == null && manopla2 != null)) {
+                            equipo[1].put("manopla");
+                        }
+
                     }
 
                 }
+
                 mutex.acquire();
                 cantEsperando--;
                 mutex.release();
+
+            } else {
+
+                mutex.release();
+
             }
 
         } catch (Exception e) {
@@ -124,4 +146,22 @@ public class RealidadVirtual implements Atraccion {
         }
     }
 
+    public void ponerPartes() {
+        try {
+            for (int i = 0; i < equipo.length; i++) {
+                for (int j = 0; j < capacidades.length; j++) {
+                    if (i == 0) {
+                        equipo[i].put("Visor" + j);
+                    } else if (i == 1) {
+                        equipo[i].put("Manopla" + j);
+                    } else {
+                        equipo[i].put("Base" + j);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+    }
 }

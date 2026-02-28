@@ -29,14 +29,19 @@ public class Parque {
         atracciones = new Atraccion[6];
         atracciones[0] = new MontaniaRusa();
         atracciones[1] = new AutitosChocadores();
+        atracciones[2] = new RealidadVirtual();
         
         areaPremios = new AreaPremios();
+        
 
         TrenMontaniaRusa trenMontaniaRusa = new TrenMontaniaRusa((MontaniaRusa) atracciones[0]);
         new Thread(trenMontaniaRusa).start();
 
         EncargadoAutitos encargadoAutos = new EncargadoAutitos((AutitosChocadores) atracciones[1]);
         new Thread(encargadoAutos).start();
+
+        EncargadoRV encargadoRV = new EncargadoRV((RealidadVirtual)atracciones[2]);
+        new Thread(encargadoRV).start();
 
         EncargadoAreaPremios encargadoPremios = new EncargadoAreaPremios(areaPremios);
         new Thread(encargadoPremios).start();

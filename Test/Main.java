@@ -1,5 +1,6 @@
 package Test;
 
+import Hilos.EncargadoRV;
 import Hilos.Visitante;
 import Objetos.Parque;
 import java.util.concurrent.ExecutorService;
@@ -14,7 +15,7 @@ public class Main {
         
         parque.abrirParque();
   
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 6; i++) {
             Visitante v = new Visitante("V-" + i, parque);
             new Thread(v).start();
             

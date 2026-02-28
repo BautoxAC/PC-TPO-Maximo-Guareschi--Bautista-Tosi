@@ -12,15 +12,19 @@ public class EncargadoRV implements Runnable {
 
     @Override
     public void run() {
+        rv.ponerPartes();
         while (true) {
+            
+            System.out.println("Esperando revisar persona");
             rv.esperarListo();
             System.out.println("Revisar que este con todo el equipo");
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 // TODO: handle exception
             }
             rv.liberaEntrada();
+            System.out.println("Entro visitante a RV");
         }
     }
 

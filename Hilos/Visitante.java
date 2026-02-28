@@ -22,7 +22,7 @@ public class Visitante implements Runnable {
         this.parque = parque;
         this.saldo = 0;
 
-        fichas[1] = 1000;
+        fichas[1] = 0;
 
         this.enParque = false;
 
@@ -84,8 +84,6 @@ public class Visitante implements Runnable {
             cantidadTotal += fichas[i];
         }
 
-        System.out.println(cantidadTotal);
-
         return (cantidadTotal > 30 || saldo > 30);
     }
 
@@ -96,10 +94,8 @@ public class Visitante implements Runnable {
         Premio premio = parque.entrarAreaPremios(this);
 
         if (premio != null) {
-            System.out.println("El visitante "+nombre+" recibio el premio ");
+            System.out.println("El visitante " + nombre + " recibio el premio ");
         }
-
-       
 
     }
 
@@ -117,19 +113,17 @@ public class Visitante implements Runnable {
 
         if (decision > 100) {
             actividad = "MR";
-        } else if (decision > 1) {
+        } else if (decision > 10000000) {
             actividad = "AC";
+        } else if (decision > 1) {
+            actividad = "RV";
         } else {
             actividad = "Salir";
         }
 
-        System.out.println(decision);
-        
         if (tieneFichas()) {
             actividad = "AreaPremios";
         }
-
-
 
         return actividad;
 
@@ -155,11 +149,14 @@ public class Visitante implements Runnable {
                     resultado = atraccion.entrar();
 
                     if (resultado) {
+                        System.out.println(nombre + " ENTRO en la actividad y espera salir " + actividad);
+                        this.esperarTiempo(actividad);
                         atraccion.salir();
 
                         agregarFicha(atraccion.obtenerTipoFichas());
-
                     }
+
+                    System.out.println(nombre + " SALE de la actividad " + actividad);
 
                 } else if (actividad.equals("AreaPremios")) {
 
@@ -207,6 +204,17 @@ public class Visitante implements Runnable {
 
     public void sacarSaldo(int saldo) {
         this.saldo -= saldo;
+    }
+
+    private void esperarTiempo(String actividad) {
+        try {
+            if (actividad.equals("RV")) {
+                Thread.sleep(1500);
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
     }
 
 }
