@@ -14,13 +14,14 @@ public class RealidadVirtual implements Atraccion {
     private Semaphore mutex;
     private Semaphore encargado;
     private Semaphore revisar;
+    private boolean actividadAbierta;
 
     public RealidadVirtual() {
         // Dentro de estas BlockingQueue la primera(en posicion 0) es para los visores,
         // la segunda (en posicion 1) es para las manoplas y la tercera (en posicion 2)
         // para las bases
         cantEsperando = 0;
-
+        actividadAbierta = false;
         mutex = new Semaphore(1);
         equipo = new BlockingQueue[3];
         for (int i = 0; i < equipo.length; i++) {
@@ -36,7 +37,7 @@ public class RealidadVirtual implements Atraccion {
         try {
             mutex.acquire();
 
-            if (cantEsperando < 4) {
+            if (cantEsperando < 4 && actividadAbierta) {
 
                 cantEsperando++;
                 mutex.release();
@@ -118,16 +119,18 @@ public class RealidadVirtual implements Atraccion {
         return "RV";
     }
 
-    @Override
     public void cerrarActividad() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'cerrarActividad'");
+        try {
+            mutex.acquire();
+            actividadAbierta = false;
+            mutex.release();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
     }
 
-    @Override
     public boolean estaAbierta() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'estaAbierta'");
+        return actividadAbierta;
     }
 
     public void esperarListo() {
