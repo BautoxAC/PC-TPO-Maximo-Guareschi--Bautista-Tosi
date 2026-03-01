@@ -47,15 +47,31 @@ public class CarreraGomones implements Atraccion {
 
         largadaBarrier = new CyclicBarrier(gomonesRequeridos, () -> {
             System.out.println("COMIENZA LA CARRERA DE GOMONES");
-            actividadIniciada = true;
+            try {
+                mutex.acquire();
+                actividadIniciada = true;
+                mutex.release();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            
         });
 
         llegadaBarrier = new CyclicBarrier(gomonesRequeridos, () -> {
             System.out.println("TERMINA LA CARRERA");
-            hayGanador.set(false);
-            GI = 60;
-            GD = 40;
-            actividadIniciada = false;
+            try {
+                mutex.acquire();
+                
+                hayGanador.set(false);
+                GI = 60;
+                GD = 40;
+                actividadIniciada = false;
+
+                mutex.release();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            
 
         });
 
