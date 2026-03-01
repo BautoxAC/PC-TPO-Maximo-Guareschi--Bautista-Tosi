@@ -4,7 +4,7 @@ import java.util.Random;
 
 import Objetos.*;
 
-public class Visitante implements Runnable {
+public class Visitante extends Thread {
 
     private String nombre;
     private int[] fichas;
@@ -42,7 +42,7 @@ public class Visitante implements Runnable {
         }
     }
 
-    private void agregarFicha(String ficha) {
+    public void agregarFicha(String ficha) {
 
         int cantidadAAumentar = parque.obtenerValoresFicha(ficha);
 
@@ -115,8 +115,10 @@ public class Visitante implements Runnable {
             actividad = "MR";
         } else if (decision > 10000000) {
             actividad = "AC";
-        } else if (decision > 1) {
+        } else if (decision > 1000) {
             actividad = "RV";
+        } else if (decision > 1) {
+            actividad = "CG";  
         } else {
             actividad = "Salir";
         }
@@ -210,6 +212,9 @@ public class Visitante implements Runnable {
         try {
             if (actividad.equals("RV")) {
                 Thread.sleep(1500);
+            } else if (actividad.equals("CG")) {
+                System.out.println("El visitante esta yendo en la carrera ....");
+                Thread.sleep(10000);
             }
         } catch (Exception e) {
             // TODO: handle exception

@@ -30,6 +30,7 @@ public class Parque {
         atracciones[0] = new MontaniaRusa();
         atracciones[1] = new AutitosChocadores();
         atracciones[2] = new RealidadVirtual();
+        atracciones[3] = new CarreraGomones();
         
         areaPremios = new AreaPremios();
         
@@ -40,8 +41,11 @@ public class Parque {
         EncargadoAutitos encargadoAutos = new EncargadoAutitos((AutitosChocadores) atracciones[1]);
         new Thread(encargadoAutos).start();
 
-        EncargadoRV encargadoRV = new EncargadoRV((RealidadVirtual)atracciones[2]);
+        EncargadoRV encargadoRV = new EncargadoRV((RealidadVirtual) atracciones[2]);
         new Thread(encargadoRV).start();
+
+        Camioneta camioneta = new Camioneta((CarreraGomones) atracciones[3]);
+        new Thread(camioneta).start();
 
         EncargadoAreaPremios encargadoPremios = new EncargadoAreaPremios(areaPremios);
         new Thread(encargadoPremios).start();
@@ -83,7 +87,7 @@ public class Parque {
             mutexParque.acquire();
 
             this.parqueAbierto = true;
-            // abrirActividades();
+            abrirActividades();
 
             System.out.println("=== PARQUE ABIERTO (09:00) ===");
 
@@ -113,6 +117,18 @@ public class Parque {
 
     }
 
+    public void abrirActividades() {
+
+        System.out.println("=== ACTIVIDADES ABRIENDO ===");
+        
+        for (int i = 0; i < atracciones.length; i++) {
+            if (atracciones[i] != null) {
+                //atracciones[i].abrirActividad();
+            } 
+        }
+
+    }
+
     public void cerrarActividades() {
         System.out.println("=== ACTIVIDADES CERRANDO (19:00) ===");
         
@@ -124,7 +140,7 @@ public class Parque {
 
     }
 
-
+    
 
     // public int getPersonasEnMontañaRusa() {
     // return montañaRusa.getPersonasEsperando();

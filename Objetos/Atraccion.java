@@ -9,6 +9,8 @@ public interface Atraccion {
 
     public void cerrarActividad();
 
+    //public void abrirActividad();
+
     public boolean estaAbierta();
 
     public String obtenerTipoFichas();

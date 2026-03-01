@@ -15,9 +15,9 @@ public class Main {
         
         parque.abrirParque();
   
-        for (int i = 1; i <= 6; i++) {
+        for (int i = 1; i <= 100; i++) {
             Visitante v = new Visitante("V-" + i, parque);
-            new Thread(v).start();
+            v.start();
             
             Thread.sleep(10 + (int)(Math.random() * 10));
             
