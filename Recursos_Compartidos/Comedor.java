@@ -2,6 +2,8 @@ package Recursos_Compartidos;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import Objetos.Atraccion;
@@ -19,6 +21,12 @@ public class Comedor implements Atraccion {
     public Comedor() {
         inicioComer = new CyclicBarrier(cantComer, () -> {
             System.out.println("Empiezan a comer");
+            lock.lock();
+            try {
+                mesasOcupadas++;
+            } finally {
+                lock.unlock();
+            }
         });
         lock = new ReentrantLock();
         mesasOcupadas = 0;
@@ -39,17 +47,19 @@ public class Comedor implements Atraccion {
         boolean entro = false;
         lock.lock();
         if (mesasOcupadas < cantMesas && !actividadAbierta) {
+            lock.unlock();
             try {
-                inicioComer.await();
-                mesasOcupadas++;
+                inicioComer.await(15, TimeUnit.SECONDS);
+
                 entro = true;
-            } catch (InterruptedException | BrokenBarrierException e) {
+            } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
                 System.out.println(e);
+                entro = false;
             }
         } else {
             System.out.println("Mesas llenas");
         }
-        lock.unlock();
+
         return entro;
     }
 
