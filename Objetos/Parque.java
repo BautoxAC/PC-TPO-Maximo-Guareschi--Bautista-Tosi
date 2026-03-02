@@ -123,7 +123,7 @@ public class Parque {
         
         for (int i = 0; i < atracciones.length; i++) {
             if (atracciones[i] != null) {
-                //atracciones[i].abrirActividad();
+                atracciones[i].abrirActividad();
             } 
         }
 

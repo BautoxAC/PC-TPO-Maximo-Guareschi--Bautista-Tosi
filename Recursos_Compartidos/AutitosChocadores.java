@@ -125,4 +125,14 @@ public class AutitosChocadores implements Atraccion {
         return "AC";
     }
 
+    @Override
+    public void abrirActividad() {
+        lock.lock();
+        try {
+            actividadAbierta = true;
+        } finally {
+            lock.unlock();
+        }
+    }
+
 }

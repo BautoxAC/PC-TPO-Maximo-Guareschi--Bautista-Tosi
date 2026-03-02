@@ -167,4 +167,15 @@ public class RealidadVirtual implements Atraccion {
         }
 
     }
+
+    @Override
+    public void abrirActividad() {
+        try {
+            mutex.acquire();
+            actividadAbierta = true;
+            mutex.release();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 }

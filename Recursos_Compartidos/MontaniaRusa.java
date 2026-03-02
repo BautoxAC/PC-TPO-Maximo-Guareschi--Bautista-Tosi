@@ -146,4 +146,15 @@ public class MontaniaRusa implements Atraccion {
         return "MR";
     }
 
+     @Override
+    public void abrirActividad() {
+        try {
+            mutex.acquire();
+            actividadAbierta = true;
+            mutex.release();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 }

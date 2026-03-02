@@ -1,7 +1,6 @@
 package Objetos;
 
 public interface Atraccion {
-    
 
     public boolean entrar();
 
@@ -9,12 +8,10 @@ public interface Atraccion {
 
     public void cerrarActividad();
 
-    //public void abrirActividad();
+    public void abrirActividad();
 
     public boolean estaAbierta();
 
     public String obtenerTipoFichas();
-
-
 
 }

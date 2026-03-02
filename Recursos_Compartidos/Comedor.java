@@ -29,9 +29,7 @@ public class Comedor implements Atraccion {
         actividadAbierta = false;
         fin = new CyclicBarrier(cantComer, () -> {
             System.out.println("Terminan de comer");
-            lock.lock();
-            personasDentro -= 4;
-            lock.unlock();
+
         });
     }
 
@@ -55,6 +53,7 @@ public class Comedor implements Atraccion {
             }
         } else {
             System.out.println("Mesas llenas");
+            lock.unlock();
         }
 
         return entro;
@@ -64,6 +63,9 @@ public class Comedor implements Atraccion {
     public void salir() {
         try {
             fin.await();
+            lock.lock();
+            personasDentro--;
+            lock.unlock();
         } catch (InterruptedException | BrokenBarrierException e) {
             System.out.println(e);
         }
@@ -84,6 +86,13 @@ public class Comedor implements Atraccion {
     @Override
     public String obtenerTipoFichas() {
         return "";
+    }
+
+    @Override
+    public void abrirActividad() {
+        lock.lock();
+        actividadAbierta = true;
+        lock.unlock();
     }
 
 }
