@@ -11,16 +11,18 @@ public class Teatro implements Atraccion {
     private boolean estaEncurso;
     private Semaphore mutex;
     private int cantGrupo;
-    private int gruposAdentro;
+    private Semaphore cupos;
     private CyclicBarrier entrarGrupo;
     private Semaphore salirGrupos;
+    private int gruposAdentro;
 
     public Teatro() {
         mutex = new Semaphore(1);
         actividadAbierta = false;
         estaEncurso = false;
-        gruposAdentro = 0;
         cantGrupo = 5;
+        gruposAdentro = 0;
+        cupos = new Semaphore(cantGrupo * 4);
         salirGrupos = new Semaphore(0);
         entrarGrupo = new CyclicBarrier(cantGrupo, () -> {
             try {
@@ -30,6 +32,7 @@ public class Teatro implements Atraccion {
             } catch (Exception e) {
                 // TODO: handle exception
             }
+
         });
 
     }
@@ -39,14 +42,17 @@ public class Teatro implements Atraccion {
         boolean entro = false;
         try {
             mutex.acquire();
-            if (actividadAbierta && gruposAdentro < 4 && !estaEncurso) {
+            if (actividadAbierta && !estaEncurso && cupos.tryAcquire()) {
+
                 mutex.release();
                 entrarGrupo.await(15, TimeUnit.SECONDS);
                 entro = true;
+
             } else {
                 mutex.release();
             }
         } catch (Exception e) {
+            cupos.release();
             // TODO: handle exception
         }
 
@@ -77,6 +83,7 @@ public class Teatro implements Atraccion {
             mutex.acquire();
             estaEncurso = false;
             salirGrupos.release(gruposAdentro * 5);
+            cupos.release(gruposAdentro * 5);
             gruposAdentro = 0;
             mutex.release();
         } catch (Exception e) {

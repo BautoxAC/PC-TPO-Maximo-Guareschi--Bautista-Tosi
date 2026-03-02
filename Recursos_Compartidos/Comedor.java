@@ -15,30 +15,23 @@ public class Comedor implements Atraccion {
     private final int cantMesas = 20;
     private ReentrantLock lock;
     private boolean actividadAbierta;
-    private int mesasOcupadas;
+    private int limitePersonas;
+    private int personasDentro;
     private CyclicBarrier fin;
 
     public Comedor() {
         inicioComer = new CyclicBarrier(cantComer, () -> {
             System.out.println("Empiezan a comer");
-            lock.lock();
-            try {
-                mesasOcupadas++;
-            } finally {
-                lock.unlock();
-            }
         });
         lock = new ReentrantLock();
-        mesasOcupadas = 0;
+        personasDentro = 0;
+        limitePersonas = cantComer * cantMesas;
         actividadAbierta = false;
         fin = new CyclicBarrier(cantComer, () -> {
+            System.out.println("Terminan de comer");
             lock.lock();
-            try {
-                mesasOcupadas--;
-                System.out.println("Terminan de comer");
-            } finally {
-                lock.unlock();
-            }
+            personasDentro -= 4;
+            lock.unlock();
         });
     }
 
@@ -46,14 +39,18 @@ public class Comedor implements Atraccion {
     public boolean entrar() {
         boolean entro = false;
         lock.lock();
-        if (mesasOcupadas < cantMesas && !actividadAbierta) {
+        if (personasDentro < limitePersonas && !actividadAbierta) {
+            personasDentro++;
             lock.unlock();
             try {
                 inicioComer.await(15, TimeUnit.SECONDS);
 
                 entro = true;
-            } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            } catch (Exception e) {
                 System.out.println(e);
+                lock.lock();
+                personasDentro--;
+                lock.unlock();
                 entro = false;
             }
         } else {
