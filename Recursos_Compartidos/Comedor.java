@@ -39,7 +39,7 @@ public class Comedor implements Atraccion {
     public boolean entrar() {
         boolean entro = false;
         lock.lock();
-        if (personasDentro < limitePersonas && !actividadAbierta) {
+        if (personasDentro < limitePersonas && actividadAbierta) {
             personasDentro++;
             lock.unlock();
             try {
