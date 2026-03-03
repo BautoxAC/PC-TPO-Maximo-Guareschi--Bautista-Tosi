@@ -39,8 +39,8 @@ public class Comedor implements Atraccion {
     public boolean entrar() {
         boolean entro = false;
         Mesa mesaActual;
-        lockPersonas.lock();
         Visitante visitante = (Visitante) Thread.currentThread();
+        lockPersonas.lock();
         if (personasDentro < limitePersonas && actividadAbierta) {
             personasDentro++;
             lockPersonas.unlock();
