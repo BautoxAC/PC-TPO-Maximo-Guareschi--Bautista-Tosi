@@ -375,4 +375,15 @@ public class CarreraGomones implements Atraccion {
     public String obtenerTipoFichas() {
         return "CG";
     }
+
+    @Override
+    public void abrirActividad() {
+         try {
+            mutex.acquire();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        actividadAbierta = true;
+        mutex.release();
+    }
 }
