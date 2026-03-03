@@ -117,9 +117,11 @@ public class Visitante extends Thread {
             actividad = "AC";
         } else if (decision > 1000) {
             actividad = "RV";
-        } else if (decision > 1) {
+        } else if (decision > 10000) {
             actividad = "CG";  
-        } else {
+        } else if (decision > 1) {
+            actividad = "CO";  
+        }else {
             actividad = "Salir";
         }
 

@@ -3,7 +3,6 @@ package Objetos;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-
 import Hilos.*;
 import Recursos_Compartidos.*;
 
@@ -31,9 +30,9 @@ public class Parque {
         atracciones[1] = new AutitosChocadores();
         atracciones[2] = new RealidadVirtual();
         atracciones[3] = new CarreraGomones();
-        
+        atracciones[4] = new Comedor();
+
         areaPremios = new AreaPremios();
-        
 
         TrenMontaniaRusa trenMontaniaRusa = new TrenMontaniaRusa((MontaniaRusa) atracciones[0]);
         new Thread(trenMontaniaRusa).start();
@@ -49,7 +48,6 @@ public class Parque {
 
         EncargadoAreaPremios encargadoPremios = new EncargadoAreaPremios(areaPremios);
         new Thread(encargadoPremios).start();
-
 
     }
 
@@ -120,27 +118,25 @@ public class Parque {
     public void abrirActividades() {
 
         System.out.println("=== ACTIVIDADES ABRIENDO ===");
-        
+
         for (int i = 0; i < atracciones.length; i++) {
             if (atracciones[i] != null) {
                 atracciones[i].abrirActividad();
-            } 
+            }
         }
 
     }
 
     public void cerrarActividades() {
         System.out.println("=== ACTIVIDADES CERRANDO (19:00) ===");
-        
+
         for (int i = 0; i < atracciones.length; i++) {
             if (atracciones[i] != null) {
                 atracciones[i].cerrarActividad();
-            } 
+            }
         }
 
     }
-
-    
 
     // public int getPersonasEnMontañaRusa() {
     // return montañaRusa.getPersonasEsperando();
@@ -152,7 +148,8 @@ public class Parque {
 
     }
 
-    // Metodo que recibe le actividad y devuelve el numero correspondiente para las fichas y las actividades
+    // Metodo que recibe le actividad y devuelve el numero correspondiente para las
+    // fichas y las actividades
 
     public int traducirActividad(String actividad) {
 
@@ -170,6 +167,9 @@ public class Parque {
                 break;
             case "CG":
                 num = 3;
+                break;
+            case "CO":
+                num = 4;
                 break;
             default:
                 num = 0;
