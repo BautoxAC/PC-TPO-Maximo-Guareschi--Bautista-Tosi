@@ -13,27 +13,22 @@ import Objetos.Mesa;
 
 public class Comedor implements Atraccion {
 
-    private BlockingQueue<Mesa> mesas;
-    private BlockingQueue<Mesa> mesasASalir;
-    private CyclicBarrier ponerMesa;
+    private Mesa[] mesas;
     private final int cantComer = 4;
     private final int cantMesas = 20;
     private ReentrantLock lockPersonas;
-    private ReentrantLock lockMesas;
     private boolean actividadAbierta;
     private int limitePersonas;
     private int personasDentro;
     private ConcurrentHashMap<Visitante, Mesa> visitanteAMesa;
 
     public Comedor() {
-        mesas = new ArrayBlockingQueue<>(cantMesas);
-        mesasASalir = new ArrayBlockingQueue<>(cantMesas);
+        mesas = new Mesa[cantMesas];
         for (int i = 0; i < cantMesas; i++) {
-            mesas.offer(new Mesa());
+            mesas[i] = new Mesa(i);
         }
 
         lockPersonas = new ReentrantLock();
-        lockMesas = new ReentrantLock();
         personasDentro = 0;
         limitePersonas = cantComer * cantMesas;
         actividadAbierta = false;
@@ -43,16 +38,14 @@ public class Comedor implements Atraccion {
     @Override
     public boolean entrar() {
         boolean entro = false;
-        Mesa mesaActual = mesas.peek();
+        Mesa mesaActual;
         lockPersonas.lock();
         Visitante visitante = (Visitante) Thread.currentThread();
         if (personasDentro < limitePersonas && actividadAbierta) {
             personasDentro++;
             lockPersonas.unlock();
-            mesaActual = this.rotarHastaSinEstaComiendo3();
-            if (!mesaActual.estanComiendo()) {
-                entro = mesaActual.entrarMesa();
-            }
+            mesaActual = this.buscarNoComiendo();
+            entro = mesaActual.entrarMesa();
             if (!entro) {
                 lockPersonas.lock();
                 personasDentro--;
@@ -108,20 +101,14 @@ public class Comedor implements Atraccion {
         lockPersonas.unlock();
     }
 
-    public Mesa rotarHastaSinEstaComiendo3() {
-        Mesa mesaActual = null;
-        Mesa mesaRotar;
-        int intentos = 0;
+    public Mesa buscarNoComiendo() {
+        Mesa mesaActual = mesas[0];
+        int i = 0;
         try {
-            lockMesas.lock();
-            mesaActual = mesas.peek();
-            while (mesaActual.estanComiendo() && intentos < 3) {
-                mesaRotar = mesas.poll();
-                mesas.put(mesaRotar);
-                intentos++;
-                mesaActual = mesas.peek();
+            while (mesas[i].estanComiendo()) {
+                i = (i+1)%mesas.length;
+                mesaActual = mesas[i];
             }
-            lockMesas.unlock();
         } catch (Exception e) {
             // TODO: handle exception
         }

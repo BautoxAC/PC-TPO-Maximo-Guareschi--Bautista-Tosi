@@ -17,7 +17,7 @@ public class RealidadVirtual implements Atraccion {
     private boolean actividadAbierta;
 
     public RealidadVirtual() {
-        // Dentro de estas BlockingQueue la primera(en posicion 0) es para los visores,
+        // Dentro de esta BlockingQueue la primera(en posicion 0) es para los visores,
         // la segunda (en posicion 1) es para las manoplas y la tercera (en posicion 2)
         // para las bases
         cantEsperando = 0;

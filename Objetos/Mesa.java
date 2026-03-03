@@ -12,34 +12,36 @@ public class Mesa {
     private final int cantComer = 4;
     AtomicBoolean comiendo;
 
-    public Mesa() {
+    public Mesa(int Num) {
         comiendo = new AtomicBoolean(false);
         inicioComer = new CyclicBarrier(cantComer, () -> {
-            System.out.println("Empiezan a comer");
+            System.out.println("Empiezan a comer en mesa " + Num);
             comiendo.set(true);
         });
         fin = new CyclicBarrier(cantComer, () -> {
-            System.out.println("Terminan de comer");
+            System.out.println("Terminan de comer en mesa " + Num);
             comiendo.set(false);
         });
     }
 
     public boolean entrarMesa() {
         boolean entro = false;
-        try {
-            inicioComer.await(15, TimeUnit.SECONDS);
-            
-            entro = true;
-        } catch (Exception e) {
-            entro = false;
+        if (!estanComiendo()) {
+            try {
+                inicioComer.await(15, TimeUnit.SECONDS);
+                entro = true;
+            } catch (Exception e) {
+                entro = false;
+            }
         }
+
         return entro;
     }
 
     public void salirMesa() {
         try {
             fin.await();
-            
+
         } catch (Exception e) {
             System.out.println(e);
         }

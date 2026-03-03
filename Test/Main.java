@@ -11,11 +11,11 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Iniciando simulacion del Parque");
         
-        Parque parque = new Parque(4);
+        Parque parque = new Parque(400);
         
         parque.abrirParque();
   
-        for (int i = 1; i <= 8; i++) {
+        for (int i = 1; i <= 100; i++) {
             Visitante v = new Visitante("V-" + i, parque);
             v.start();
             
