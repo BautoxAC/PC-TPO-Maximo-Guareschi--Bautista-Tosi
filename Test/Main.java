@@ -15,7 +15,7 @@ public class Main {
         
         parque.abrirParque();
   
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 30; i++) {
             Visitante v = new Visitante("V-" + i, parque);
             v.start();
             

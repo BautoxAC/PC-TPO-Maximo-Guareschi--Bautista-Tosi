@@ -214,7 +214,7 @@ public class Visitante extends Thread {
                 Thread.sleep(1500);
             } else if (actividad.equals("CG")) {
                 System.out.println("El visitante esta yendo en la carrera ....");
-                Thread.sleep(10000);
+                Thread.sleep(3000);
             }
         } catch (Exception e) {
             // TODO: handle exception
