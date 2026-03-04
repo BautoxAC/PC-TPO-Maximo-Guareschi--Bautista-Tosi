@@ -89,9 +89,9 @@ public class Visitante extends Thread {
 
     private void canjearFichas() {
 
-        this.saldo += parque.canjearSaldo(this);
+        this.saldo += parque.canjearSaldo();
 
-        Premio premio = parque.entrarAreaPremios(this);
+        Premio premio = parque.entrarAreaPremios();
 
         if (premio != null) {
             System.out.println("El visitante " + nombre + " recibio el premio ");
@@ -118,12 +118,12 @@ public class Visitante extends Thread {
         } else if (decision > 1000) {
             actividad = "RV";
         } else if (decision > 10000) {
-            actividad = "CG";  
+            actividad = "CG";
         } else if (decision > 100000000) {
-            actividad = "CO";  
-        }else if (decision > 0) {
-            actividad = "TE";  
-        }else{
+            actividad = "CO";
+        } else if (decision > 0) {
+            actividad = "TE";
+        } else {
             actividad = "Salir";
         }
 
@@ -148,10 +148,10 @@ public class Visitante extends Thread {
                 actividad = elegirActividad();
 
                 System.out.println(nombre + " TRATA DE ENTRAR a la actividad " + actividad);
-                
+
                 if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) {
                     atraccion = parque.obtenerAtraccion(actividad);
-                    
+
                     resultado = atraccion.entrar();
 
                     if (resultado) {
@@ -186,20 +186,28 @@ public class Visitante extends Thread {
 
     public void run() {
 
+        boolean pudoEntrar;
+
         try {
 
-            boolean pudoEntrar = entrarParque();
+            while (true) {
 
-            if (pudoEntrar) {
+                pudoEntrar = entrarParque();
 
-                // System.out.println("entro");
+                if (pudoEntrar) {
 
-                realizarActividades();
+                    realizarActividades();
+
+                }
+
+                System.out.println("El visitante "+nombre+" se va a dormir ...");
+
+                Thread.sleep(40000);
 
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }
@@ -219,12 +227,12 @@ public class Visitante extends Thread {
             } else if (actividad.equals("CG")) {
                 System.out.println("El visitante esta yendo en la carrera ....");
                 Thread.sleep(3000);
-            }else if (actividad.equals("CO")) {
+            } else if (actividad.equals("CO")) {
                 System.out.println("El visitante esta yendo en la carrera ....");
                 Thread.sleep(5000);
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }

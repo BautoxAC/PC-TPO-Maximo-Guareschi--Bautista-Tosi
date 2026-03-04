@@ -97,7 +97,7 @@ public class RealidadVirtual implements Atraccion {
             encargado.release();
             revisar.acquire();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -110,7 +110,7 @@ public class RealidadVirtual implements Atraccion {
             equipo[2].put("base");
 
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -137,7 +137,7 @@ public class RealidadVirtual implements Atraccion {
         try {
             encargado.acquire();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -145,7 +145,7 @@ public class RealidadVirtual implements Atraccion {
         try {
             revisar.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -163,7 +163,7 @@ public class RealidadVirtual implements Atraccion {
                 }
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }

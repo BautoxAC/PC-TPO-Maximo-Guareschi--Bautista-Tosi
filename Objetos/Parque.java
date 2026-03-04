@@ -2,6 +2,7 @@ package Objetos;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import Hilos.*;
 import Recursos_Compartidos.*;
@@ -9,20 +10,21 @@ import Recursos_Compartidos.*;
 public class Parque {
 
     private Semaphore molinetes;
-    private Semaphore mutexParque;
 
     public Atraccion[] atracciones;
     public AreaPremios areaPremios;
 
-    private boolean parqueAbierto;
+    private AtomicBoolean parqueAbierto;
+    private boolean actividadesAbiertas;
     private int hora;
 
     public Parque(int cantMolinetes) {
 
         molinetes = new Semaphore(cantMolinetes);
-        mutexParque = new Semaphore(1);
 
-        this.parqueAbierto = true;
+        this.parqueAbierto = new AtomicBoolean(false);
+        this.actividadesAbiertas = false;
+
         this.hora = 0;
 
         atracciones = new Atraccion[6];
@@ -63,11 +65,7 @@ public class Parque {
 
             molinetes.acquire();
 
-            mutexParque.acquire();
-
-            exito = this.parqueAbierto;
-
-            mutexParque.release();
+            exito = this.parqueAbierto.get();
 
         } catch (Exception e) {
             System.out.println(e);
@@ -86,14 +84,11 @@ public class Parque {
     public void abrirParque() {
 
         try {
-            mutexParque.acquire();
-
-            this.parqueAbierto = true;
+ 
+            this.parqueAbierto.set(true);
             abrirActividades();
 
             System.out.println("=== PARQUE ABIERTO (09:00) ===");
-
-            mutexParque.release();
 
         } catch (Exception e) {
             System.out.println(e);
@@ -104,14 +99,11 @@ public class Parque {
     public void cerrarParque() {
 
         try {
-            mutexParque.acquire();
 
-            this.parqueAbierto = false;
+            this.parqueAbierto.set(false);
             cerrarActividades();
 
             System.out.println("=== PARQUE CERRADO (18:00) ===");
-
-            mutexParque.release();
 
         } catch (Exception e) {
             System.out.println(e);
@@ -123,6 +115,8 @@ public class Parque {
 
         System.out.println("=== ACTIVIDADES ABRIENDO ===");
 
+        actividadesAbiertas = true;
+
         for (int i = 0; i < atracciones.length; i++) {
             if (atracciones[i] != null) {
                 atracciones[i].abrirActividad();
@@ -133,6 +127,8 @@ public class Parque {
 
     public void cerrarActividades() {
         System.out.println("=== ACTIVIDADES CERRANDO (19:00) ===");
+
+        actividadesAbiertas = false;
 
         for (int i = 0; i < atracciones.length; i++) {
             if (atracciones[i] != null) {
@@ -211,15 +207,46 @@ public class Parque {
     }
 
     public boolean estaAbierto() {
-        return this.parqueAbierto;
+        return this.parqueAbierto.get();
     }
 
-    public int canjearSaldo(Visitante visitante) {
-        return areaPremios.canjearSaldo(visitante);
+    public int canjearSaldo() {
+        return areaPremios.canjearSaldo();
     }
 
-    public Premio entrarAreaPremios(Visitante visitante) {
-        return areaPremios.canjear(visitante);
+    public Premio entrarAreaPremios() {
+        return areaPremios.canjear();
     }
+
+    public void aumentarHorario() {
+
+        hora = (hora + 1) % 24;
+
+    }
+
+    public int obtenerEstadoActual() {
+
+        int estado = 1;
+
+        if (hora >= 9 && hora <= 17) {
+            estado = 1; // se abre el parque
+        } else if (hora == 18) {
+            estado = 3; // se cierra el parque
+        } else if (hora == 19) {
+            estado = 2; // se cierran las actividades
+        }
+        
+        return estado;
+
+    }
+
+    public int obtenerHora() {
+        return hora;
+    }
+
+    public boolean actividadesHabilitadas() {
+        return actividadesAbiertas;
+    }
+
 
 }

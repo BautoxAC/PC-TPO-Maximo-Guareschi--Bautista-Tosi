@@ -3,9 +3,7 @@ package Objetos;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Mesa {
 
@@ -43,7 +41,7 @@ public class Mesa {
                 entro = false;
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
         return entro;

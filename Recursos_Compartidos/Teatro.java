@@ -33,7 +33,7 @@ public class Teatro implements Atraccion {
                 mutex.release();
                 System.out.println("Entro el grupo numero " + gruposAdentro + "--------------------------------------");
             } catch (Exception e) {
-                // TODO: handle exception
+                System.out.println(e);
             }
 
         });
@@ -56,7 +56,7 @@ public class Teatro implements Atraccion {
             }
         } catch (Exception e) {
             cupos.release();
-            // TODO: handle exception
+            System.out.println(e);
         }
 
         return entro;
@@ -67,7 +67,7 @@ public class Teatro implements Atraccion {
         try {
             salirGrupos.acquire();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -77,7 +77,7 @@ public class Teatro implements Atraccion {
             estaEncurso = true;
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -89,7 +89,7 @@ public class Teatro implements Atraccion {
             estaEncurso = false;
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -99,7 +99,7 @@ public class Teatro implements Atraccion {
             salirGrupos.release(gruposAdentro * 5);
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -110,7 +110,7 @@ public class Teatro implements Atraccion {
             actividadAbierta = false;
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }
@@ -122,7 +122,7 @@ public class Teatro implements Atraccion {
             actividadAbierta = true;
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }
@@ -141,7 +141,7 @@ public class Teatro implements Atraccion {
         try {
             teatro.acquire();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
     }
 
@@ -153,7 +153,7 @@ public class Teatro implements Atraccion {
             }
             mutex.release();
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
     }

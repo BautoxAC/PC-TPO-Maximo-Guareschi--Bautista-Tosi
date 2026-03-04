@@ -14,7 +14,6 @@ public class CarreraGomones implements Atraccion {
     private final int GOMONES_PARA_LARGAR = 10;
 
     private Semaphore mutex;
-    private Semaphore mutexPareja;
 
     private Semaphore gomonesIndividuales;
     private Semaphore gomonesDobles;
@@ -56,7 +55,6 @@ public class CarreraGomones implements Atraccion {
         actividadIniciada = false;
 
         mutex = new Semaphore(1);
-        mutexPareja = new Semaphore(1);
 
         trenBarrier = new CyclicBarrier(15, () -> {
             System.out.println("TREN LLENO, va a la carrera");

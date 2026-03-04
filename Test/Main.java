@@ -1,39 +1,26 @@
 package Test;
 
-import Hilos.EncargadoRV;
+import Hilos.Propietario;
 import Hilos.Visitante;
 import Objetos.Parque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main (String[] args) {
         System.out.println("Iniciando simulacion del Parque");
         
-        Parque parque = new Parque(400);
-        
-        parque.abrirParque();
+        Parque parque = new Parque(100);
+        Propietario propietario = new Propietario(parque);
+        propietario.start();
   
-        for (int i = 1; i <= 40; i++) {
+        for (int i = 1; i <= 100; i++) {
             Visitante v = new Visitante("V-" + i, parque);
             v.start();
-            
-            Thread.sleep(10 + (int)(Math.random() * 10));
-            
-            
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
 
-        Thread.sleep(61000);
-
-        Thread.sleep(100 + (int)(Math.random() * 700));
-            
-        parque.cerrarActividades();
-        
-        Thread.sleep(2000);
-
-        parque.cerrarParque();
-        
-        System.out.println("Parque cerrado");
     }
 }

@@ -26,16 +26,19 @@ public class AreaPremios {
 
     }
 
-    public Premio canjear(Visitante visitante) {
+    public Premio canjear() {
 
         Premio premio = null;
         int cantidad;
+        Visitante visitante;
 
         try {
 
             capacidad.acquire();
 
             try {
+
+                visitante = (Visitante) Thread.currentThread();
 
                 cantidad = visitante.obtenerSaldo();
 
@@ -52,7 +55,7 @@ public class AreaPremios {
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
         }
 
         return premio;
@@ -90,9 +93,10 @@ public class AreaPremios {
         return mejor;
     }
 
-    public int canjearSaldo(Visitante visitante) {
+    public int canjearSaldo() {
 
         int saldoAdquirido = 0;
+        Visitante visitante = (Visitante) Thread.currentThread();
 
         saldoAdquirido += visitante.obtenerFichas("MR") * 3;
         saldoAdquirido += visitante.obtenerFichas("AC") * 4;
