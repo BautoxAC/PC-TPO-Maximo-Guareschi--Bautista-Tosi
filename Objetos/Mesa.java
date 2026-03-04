@@ -4,6 +4,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Mesa {
@@ -11,51 +12,56 @@ public class Mesa {
     private CyclicBarrier inicioComer;
     private CyclicBarrier fin;
     private final int cantComer = 4;
-    private int adentro;
+    private AtomicInteger adentro;
     private Semaphore mutex;
-    AtomicBoolean comiendo;
+    private int Num;
 
     public Mesa(int Num) {
-        comiendo = new AtomicBoolean(false);
+        this.Num = Num;
         inicioComer = new CyclicBarrier(cantComer, () -> {
             System.out.println("Empiezan a comer en mesa " + Num);
-            comiendo.set(true);
         });
         mutex = new Semaphore(1);
-        adentro = 0;
+        adentro = new AtomicInteger(0);
         fin = new CyclicBarrier(cantComer, () -> {
             System.out.println("Terminan de comer en mesa " + Num);
-            comiendo.set(false);
-            try {
-                mutex.acquire();
-                adentro = 0;
-                mutex.release();
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-
+            adentro.set(0);
         });
+    }
+
+    public int num() {
+        return this.Num;
     }
 
     public boolean entrarMesa() {
         boolean entro = false;
         try {
-            mutex.acquire();
-            if (!estanComiendo() && adentro < cantComer) {
-                adentro++;
-                mutex.release();
-                try {
-                    inicioComer.await(15, TimeUnit.SECONDS);
-                    entro = true;
-                } catch (Exception e) {
-                    entro = false;
-                }
+            try {
+                inicioComer.await(15, TimeUnit.SECONDS);
+                entro = true;
+            } catch (Exception e) {
+                entro = false;
             }
         } catch (Exception e) {
             // TODO: handle exception
         }
 
         return entro;
+    }
+
+    public boolean reservarLugar() {
+        boolean reservo = false;
+        try {
+            mutex.acquire();
+            if (!estanComiendo()) {
+                adentro.incrementAndGet();
+                reservo = true;
+            }
+            mutex.release();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return reservo;
     }
 
     public void salirMesa() {
@@ -68,6 +74,6 @@ public class Mesa {
     }
 
     public boolean estanComiendo() {
-        return comiendo.get();
+        return adentro.get() == cantComer;
     }
 }

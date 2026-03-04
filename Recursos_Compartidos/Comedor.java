@@ -44,7 +44,7 @@ public class Comedor implements Atraccion {
         if (personasDentro < limitePersonas && actividadAbierta) {
             personasDentro++;
             lockPersonas.unlock();
-            mesaActual = this.buscarNoComiendo();
+            mesaActual = this.buscarNoComiendoYReservarLugar();
             entro = mesaActual.entrarMesa();
             if (!entro) {
                 lockPersonas.lock();
@@ -101,16 +101,16 @@ public class Comedor implements Atraccion {
         lockPersonas.unlock();
     }
 
-    public Mesa buscarNoComiendo() {
+    public Mesa buscarNoComiendoYReservarLugar() {
         Mesa mesaActual = mesas[0];
         int i = 0;
         try {
-            while (mesas[i].estanComiendo()) {
+            while (!mesas[i].reservarLugar()) {
                 i = (i+1)%mesas.length;
                 mesaActual = mesas[i];
             }
         } catch (Exception e) {
-            // TODO: handle exception
+           System.out.println(e);
         }
         return mesaActual;
     }
