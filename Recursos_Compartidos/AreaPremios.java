@@ -20,7 +20,7 @@ public class AreaPremios {
 
         premios.add(new Premio("manzana", 13));
         premios.add(new Premio("pelota", 70));
-        premios.add(new Premio("pera", 90));
+        premios.add(new Premio("raqueta", 90));
         premios.add(new Premio("play", 1000));
 
 

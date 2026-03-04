@@ -31,6 +31,7 @@ public class Parque {
         atracciones[2] = new RealidadVirtual();
         atracciones[3] = new CarreraGomones();
         atracciones[4] = new Comedor();
+        atracciones[5] = new Teatro();
 
         areaPremios = new AreaPremios();
 
@@ -48,6 +49,9 @@ public class Parque {
 
         EncargadoAreaPremios encargadoPremios = new EncargadoAreaPremios(areaPremios);
         new Thread(encargadoPremios).start();
+
+        EncargadoTeatro encargadoTeatro  = new EncargadoTeatro((Teatro)atracciones[5]);
+        new Thread(encargadoTeatro).start();
 
     }
 
@@ -138,9 +142,6 @@ public class Parque {
 
     }
 
-    // public int getPersonasEnMontañaRusa() {
-    // return montañaRusa.getPersonasEsperando();
-    // }
 
     public Atraccion obtenerAtraccion(String actividad) {
 
@@ -170,6 +171,9 @@ public class Parque {
                 break;
             case "CO":
                 num = 4;
+                break;
+            case "TE":
+                num = 5;
                 break;
             default:
                 num = 0;

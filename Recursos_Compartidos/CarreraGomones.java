@@ -187,16 +187,11 @@ public class CarreraGomones implements Atraccion {
 
                 visitante = (Visitante) Thread.currentThread();
 
-                
-                System.out.println(gomonesDobles.availablePermits());
-                System.out.println(gomonesIndividuales.availablePermits());
-                System.out.println(gomonesListos.availablePermits());
-
                 if (gomonesDobles.tryAcquire()) {
 
                     try {
                         
-                        pareja = exchangerDoble.exchange(visitante);
+                        pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS);
 
                         comparacion = visitante.obtenerNombre().compareTo(pareja.obtenerNombre());
 
@@ -239,8 +234,6 @@ public class CarreraGomones implements Atraccion {
 
                 if (visitanteAGomon.containsKey(visitante)) {
 
-                    System.out.println("ESTA ");
-
                     mutex.acquire();
 
                     if (!actividadIniciada) {
@@ -250,12 +243,9 @@ public class CarreraGomones implements Atraccion {
                         puedeCorrer = false;
                     }
 
-                    System.out.println(participantes);
-
                     mutex.release();
 
                     if (esConductor) {
-                        System.out.println("libera");
                         gomonesListos.release();
                     }
 

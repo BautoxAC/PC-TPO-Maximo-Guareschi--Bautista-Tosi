@@ -89,7 +89,7 @@ public class Visitante extends Thread {
 
     private void canjearFichas() {
 
-        saldo += parque.canjearSaldo(this);
+        this.saldo += parque.canjearSaldo(this);
 
         Premio premio = parque.entrarAreaPremios(this);
 
@@ -119,9 +119,11 @@ public class Visitante extends Thread {
             actividad = "RV";
         } else if (decision > 10000) {
             actividad = "CG";  
-        } else if (decision > 1) {
+        } else if (decision > 100000000) {
             actividad = "CO";  
-        }else {
+        }else if (decision > 0) {
+            actividad = "TE";  
+        }else{
             actividad = "Salir";
         }
 
@@ -145,15 +147,15 @@ public class Visitante extends Thread {
 
                 actividad = elegirActividad();
 
-                System.out.println(nombre + " ENTRA a la actividad " + actividad);
-
+                System.out.println(nombre + " TRATA DE ENTRAR a la actividad " + actividad);
+                
                 if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) {
                     atraccion = parque.obtenerAtraccion(actividad);
-
+                    
                     resultado = atraccion.entrar();
 
                     if (resultado) {
-                        System.out.println(nombre + " ENTRO en la actividad y espera salir " + actividad);
+                        System.out.println(nombre + " ENTRO Y ESPERA salir de actividad " + actividad);
                         this.esperarTiempo(actividad);
                         atraccion.salir();
 

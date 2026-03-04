@@ -14,6 +14,7 @@ public class Teatro implements Atraccion {
     private Semaphore cupos;
     private CyclicBarrier entrarGrupo;
     private Semaphore salirGrupos;
+    private Semaphore teatro;
     private int gruposAdentro;
 
     public Teatro() {
@@ -22,6 +23,7 @@ public class Teatro implements Atraccion {
         estaEncurso = false;
         cantGrupo = 5;
         gruposAdentro = 0;
+        teatro = new Semaphore(0);
         cupos = new Semaphore(cantGrupo * 4);
         salirGrupos = new Semaphore(0);
         entrarGrupo = new CyclicBarrier(cantGrupo, () -> {
@@ -29,6 +31,7 @@ public class Teatro implements Atraccion {
                 mutex.acquire();
                 gruposAdentro++;
                 mutex.release();
+                System.out.println("Entro el grupo numero " + gruposAdentro + "--------------------------------------");
             } catch (Exception e) {
                 // TODO: handle exception
             }
@@ -81,10 +84,19 @@ public class Teatro implements Atraccion {
     public void sacarEnCurso() {
         try {
             mutex.acquire();
-            estaEncurso = false;
-            salirGrupos.release(gruposAdentro * 5);
             cupos.release(gruposAdentro * 5);
             gruposAdentro = 0;
+            estaEncurso = false;
+            mutex.release();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
+
+    public void habilitarSalida() {
+        try {
+            mutex.acquire();
+            salirGrupos.release(gruposAdentro * 5);
             mutex.release();
         } catch (Exception e) {
             // TODO: handle exception
@@ -106,6 +118,7 @@ public class Teatro implements Atraccion {
     public void abrirActividad() {
         try {
             mutex.acquire();
+            teatro.release();
             actividadAbierta = true;
             mutex.release();
         } catch (Exception e) {
@@ -122,6 +135,27 @@ public class Teatro implements Atraccion {
     @Override
     public String obtenerTipoFichas() {
         return "";
+    }
+
+    public void iniciarTeatro() {
+        try {
+            teatro.acquire();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
+
+    public void finalizarTeatro() {
+        try {
+            mutex.acquire();
+            if (actividadAbierta) {
+                teatro.release();
+            }
+            mutex.release();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
     }
 
 }
