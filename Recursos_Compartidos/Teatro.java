@@ -31,7 +31,7 @@ public class Teatro implements Atraccion {
                 mutex.acquire();
                 gruposAdentro++;
                 mutex.release();
-                System.out.println("Entro el grupo numero " + gruposAdentro + "--------------------------------------");
+                System.out.println("Entro el grupo numero " + gruposAdentro  );
             } catch (Exception e) {
                 System.out.println(e);
             }

@@ -32,7 +32,7 @@ public class AutitosChocadores implements Atraccion {
 
         esperando = 0;
         enCurso = false;
-        actividadAbierta = true;
+        actividadAbierta = false;
 
         inicio = new CyclicBarrier(CAPACIDAD, () -> {
             System.out.println("Empieza la actividad de los autitos");

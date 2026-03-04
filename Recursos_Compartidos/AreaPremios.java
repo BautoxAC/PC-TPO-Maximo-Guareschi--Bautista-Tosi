@@ -19,8 +19,11 @@ public class AreaPremios {
     public AreaPremios() {
 
         premios.add(new Premio("manzana", 13));
-        premios.add(new Premio("pelota", 70));
-        premios.add(new Premio("raqueta", 90));
+        premios.add(new Premio("pelota", 90));
+        premios.add(new Premio("pelota de pinpong", 700));
+        premios.add(new Premio("raqueta", 200));
+        premios.add(new Premio("mando", 300));
+        premios.add(new Premio("switch", 500));
         premios.add(new Premio("play", 1000));
 
 

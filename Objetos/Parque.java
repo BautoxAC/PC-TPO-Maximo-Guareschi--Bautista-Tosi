@@ -25,7 +25,7 @@ public class Parque {
         this.parqueAbierto = new AtomicBoolean(false);
         this.actividadesAbiertas = false;
 
-        this.hora = 0;
+        this.hora = 8;
 
         atracciones = new Atraccion[6];
         atracciones[0] = new MontaniaRusa();
@@ -186,16 +186,16 @@ public class Parque {
 
         switch (actividad) {
             case "MR":
-                num = 3;
+                num = 20;
                 break;
             case "AC":
-                num = 4;
+                num = 45;
                 break;
             case "RV":
-                num = 3;
+                num = 35;
                 break;
             case "CG":
-                num = 4;
+                num = 30;
                 break;
             default:
                 num = 0;
@@ -226,7 +226,7 @@ public class Parque {
 
     public int obtenerEstadoActual() {
 
-        int estado = 1;
+        int estado = 0;
 
         if (hora >= 9 && hora <= 17) {
             estado = 1; // se abre el parque

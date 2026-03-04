@@ -12,14 +12,9 @@ public class Propietario extends Thread {
 
     public void run() {
         while (true) {
-            System.out.println("HORA ACTUAL DEL PARQUE: " + parque.obtenerHora());
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-
             parque.aumentarHorario();
+            System.out.println("HORA ACTUAL DEL PARQUE: " + parque.obtenerHora());
+
 
             if (!parque.estaAbierto()) {
 
@@ -28,7 +23,7 @@ public class Propietario extends Thread {
                     parque.abrirActividades();
                     parque.abrirParque();
                 } else if (parque.actividadesHabilitadas() && parque.obtenerEstadoActual() == 2) {
-                    System.out.println("SE CIERRAN LAS ACTIVIDADES ....");
+                    System.out.println("SE CIERRAN LAS ACTIVIDADES ......................");
                     parque.cerrarActividades();
                 }
 
@@ -39,6 +34,11 @@ public class Propietario extends Thread {
                     parque.cerrarParque();
                 }
 
+            }
+            try {
+                Thread.sleep(6000);
+            } catch (Exception e) {
+                System.out.println(e);
             }
            
         }

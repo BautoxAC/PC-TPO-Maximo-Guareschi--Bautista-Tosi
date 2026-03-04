@@ -19,7 +19,7 @@ public class EncargadoAreaPremios implements Runnable {
 
                 Intercambio intercambio = area.esperarVisitante();
 
-                System.out.println("encargado recibe " + intercambio.obtenerCantidad());
+                System.out.println("encargado recibe "+ intercambio.obtenerCantidad());
 
                 Premio premio = area.calcularPremio(intercambio.obtenerCantidad());
 

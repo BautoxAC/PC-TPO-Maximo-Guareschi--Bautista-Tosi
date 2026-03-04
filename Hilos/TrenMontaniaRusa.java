@@ -24,7 +24,7 @@ public class TrenMontaniaRusa implements Runnable {
 
                 System.out.println("El tren de la montaña rusa inicia el recorrido .....");
 
-                Thread.sleep(8000);
+                Thread.sleep(6000);
 
                 montaniaRusa.llegar();
 

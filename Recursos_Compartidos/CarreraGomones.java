@@ -51,7 +51,7 @@ public class CarreraGomones implements Atraccion {
         participantes = 0;
         llegados = 0;
 
-        actividadAbierta = true;
+        actividadAbierta = false;
         actividadIniciada = false;
 
         mutex = new Semaphore(1);
@@ -188,7 +188,7 @@ public class CarreraGomones implements Atraccion {
                 if (gomonesDobles.tryAcquire()) {
 
                     try {
-                        
+
                         pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS);
 
                         comparacion = visitante.obtenerNombre().compareTo(pareja.obtenerNombre());
@@ -227,8 +227,6 @@ public class CarreraGomones implements Atraccion {
                 } else {
                     System.out.println("No hay gomones disponibles");
                 }
-
-                
 
                 if (visitanteAGomon.containsKey(visitante)) {
 
@@ -299,12 +297,16 @@ public class CarreraGomones implements Atraccion {
 
                 if (hayGanador.compareAndSet(false, true)) {
 
-                    visitante.agregarFicha("CG");
+                    for (int i = 0; i < 3; i++) {
+                        visitante.agregarFicha("CG");
+                    }
 
                     pareja = gomon.obtenerPareja(visitante);
 
                     if (pareja != null) {
-                        pareja.agregarFicha("CG");
+                        for (int i = 0; i < 3; i++) {
+                            pareja.agregarFicha("CG");
+                        }
                         System.out.println("GANARON " + visitante.obtenerNombre() + " Y " + pareja.obtenerNombre());
                     } else {
                         System.out.println("HAY GANADOR " + visitante.obtenerNombre());
@@ -366,7 +368,7 @@ public class CarreraGomones implements Atraccion {
 
     @Override
     public void abrirActividad() {
-         try {
+        try {
             mutex.acquire();
         } catch (Exception e) {
             System.out.println(e);

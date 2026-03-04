@@ -12,7 +12,7 @@ public class Main {
         Propietario propietario = new Propietario(parque);
         propietario.start();
   
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 250; i++) {
             Visitante v = new Visitante("V-" + i, parque);
             v.start();
             try {

@@ -43,7 +43,7 @@ public class MontaniaRusa implements Atraccion {
 
         cantEsperando = 0;
 
-        actividadAbierta = true;
+        actividadAbierta = false;
     
     }
 
@@ -89,7 +89,7 @@ public class MontaniaRusa implements Atraccion {
 
                 mutex.release();
                 lugares.acquire();
-                barreraInicio.await(30, TimeUnit.SECONDS);
+                barreraInicio.await(15, TimeUnit.SECONDS);
                 mutex.acquire();
 
                 cantEsperando--;

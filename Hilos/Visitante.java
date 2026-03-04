@@ -22,9 +22,35 @@ public class Visitante extends Thread {
         this.parque = parque;
         this.saldo = 0;
 
-        fichas[1] = 0;
-
         this.enParque = false;
+
+    }
+
+    public void run() {
+
+        boolean pudoEntrar;
+
+        try {
+
+            while (true) {
+
+                pudoEntrar = entrarParque();
+
+                if (pudoEntrar) {
+
+                    realizarActividades();
+
+                }
+
+                System.out.println("El visitante "+nombre+" se va a dormir ...");
+
+                Thread.sleep(20000);
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
     }
 
@@ -110,26 +136,26 @@ public class Visitante extends Thread {
         decision = random.nextInt(10) + 1;
 
         if (!parque.estaAbierto()) {
-            decision = 0;
+            decision = 10;
         }
 
-        if (decision > 100) {
+        if (decision <= 1) {
             actividad = "MR";
-        } else if (decision > 10000000) {
+        } else if (decision <= 3) {
             actividad = "AC";
-        } else if (decision > 1000) {
+        } else if (decision <= 4) {
             actividad = "RV";
-        } else if (decision > 10000) {
+        } else if (decision <= 6 ) {
             actividad = "CG";
-        } else if (decision > 100000000) {
+        } else if (decision <= 7) {
             actividad = "CO";
-        } else if (decision > 0) {
+        } else if (decision <=9 ) {
             actividad = "TE";
         } else {
             actividad = "Salir";
         }
 
-        if (tieneFichas()) {
+        if ( decision == 8 && tieneFichas()) {
             actividad = "AreaPremios";
         }
 
@@ -186,33 +212,7 @@ public class Visitante extends Thread {
 
     }
 
-    public void run() {
-
-        boolean pudoEntrar;
-
-        try {
-
-            while (true) {
-
-                pudoEntrar = entrarParque();
-
-                if (pudoEntrar) {
-
-                    realizarActividades();
-
-                }
-
-                System.out.println("El visitante "+nombre+" se va a dormir ...");
-
-                Thread.sleep(40000);
-
-            }
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-    }
+    
 
     public int obtenerSaldo() {
         return this.saldo;
