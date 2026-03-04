@@ -198,7 +198,7 @@ public class Parque {
                 num = 4;
                 break;
             default:
-                num = 1;
+                num = 0;
                 break;
         }
 

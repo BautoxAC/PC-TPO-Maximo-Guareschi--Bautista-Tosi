@@ -46,7 +46,9 @@ public class Visitante extends Thread {
 
         int cantidadAAumentar = parque.obtenerValoresFicha(ficha);
 
-        fichas[parque.traducirActividad(ficha)] += cantidadAAumentar;
+        if (cantidadAAumentar != 0) {
+            fichas[parque.traducirActividad(ficha)] += cantidadAAumentar;
+        }
 
     }
 
