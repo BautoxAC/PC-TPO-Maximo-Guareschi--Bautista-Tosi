@@ -9,9 +9,9 @@ import Hilos.Visitante;
 
 public class CarreraGomones implements Atraccion {
 
-    private final int GI = 7;
-    private final int GD = 10;
-    private final int GOMONES_PARA_LARGAR = 10;
+    private int GI = 7;
+    private int GD = 10;
+    private int GOMONES_PARA_LARGAR = 10;
 
     private Semaphore mutex;
 
@@ -25,19 +25,19 @@ public class CarreraGomones implements Atraccion {
     private int participantes;
     private int llegados;
 
-    private CyclicBarrier trenBarrier;
+    private CyclicBarrier trenBarrier; // barrera ciclica para el tren
 
-    private BlockingQueue<Bolso> bolsosEnViaje;
+    private BlockingQueue<Bolso> bolsosEnViaje; // colas bloqueantes para los bolsos
     private BlockingQueue<Bolso> bolsosEnFinal;
 
-    private Exchanger<Visitante> exchangerDoble;
+    private Exchanger<Visitante> exchangerDoble; // exchanger para determinar si hay o no gomon doble
 
     private AtomicBoolean hayGanador;
 
     private boolean actividadAbierta;
     private boolean actividadIniciada;
 
-    private ConcurrentHashMap<Visitante, Gomon> visitanteAGomon;
+    private ConcurrentHashMap<Visitante, Gomon> visitanteAGomon; // hash concurrente para mapear un visitante a su gomon
 
     public CarreraGomones() {
 
@@ -71,85 +71,7 @@ public class CarreraGomones implements Atraccion {
 
     }
 
-    private void llegarEnTren() {
-        try {
-            trenBarrier.await(6, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            System.out.println("Tren no se lleno o hubo un problema, va en bici");
-            llegarEnBici();
-        }
-    }
-
-    private void llegarEnBici() {
-        System.out.println("Llega en bicicleta al inicio");
-    }
-
-    private Bolso ponerBolso(Visitante visitante) {
-        Bolso bolso = new Bolso(new Random().nextInt(1000), visitante);
-
-        try {
-            bolsosEnViaje.put(bolso);
-            System.out.println("Bolso " + bolso.obtenerId() + " enviado del visitante " + visitante.obtenerNombre());
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
-
-        return bolso;
-    }
-
-    public void transportarBolso() {
-        Bolso bolso;
-        try {
-            bolso = bolsosEnViaje.take();
-            bolsosEnFinal.put(bolso);
-            System.out.println("Bolso " + bolso.obtenerId() + " llego al final");
-        } catch (InterruptedException e) {
-            System.out.println(e);
-        }
-    }
-
-    private void retirarBolso(Visitante visitante) {
-
-        boolean encontrado = false;
-
-        while (!encontrado) {
-            try {
-                Bolso bolso = bolsosEnFinal.take();
-
-                if (bolso.obtenerDuenio() == visitante) {
-                    System.out.println(
-                            "Visitante " + visitante.obtenerNombre() + " retira su bolso " + bolso.obtenerId());
-                    encontrado = true;
-                } else {
-                    bolsosEnFinal.put(bolso);
-                }
-
-            } catch (InterruptedException e) {
-                System.out.println(e);
-            }
-        }
-    }
-
-    public void habilitarCarrera() {
-
-        try {
-
-            gomonesListos.acquire(GOMONES_PARA_LARGAR);
-
-            mutex.acquire();
-            actividadIniciada = true;
-            participantesCarrera = participantes;
-            mutex.release();
-
-            System.out.println("EMPIEZA LA CARRERA");
-
-            semaforoEntrada.release(participantesCarrera);
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-    }
+    // metodos que hace el visitante
 
     public boolean entrar() {
 
@@ -189,9 +111,11 @@ public class CarreraGomones implements Atraccion {
 
                     try {
 
-                        pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS);
+                        pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS); // si no encuentra pareja en 3 segundos, se devuelve el permiso de gomonesDobles
 
                         comparacion = visitante.obtenerNombre().compareTo(pareja.obtenerNombre());
+
+                        // se determina quien va a ser el dueño del gomon
 
                         if (comparacion > 0) {
                             conductor = visitante;
@@ -204,7 +128,7 @@ public class CarreraGomones implements Atraccion {
                         mutex.acquire();
 
                         try {
-                            if (!visitanteAGomon.containsKey(conductor)) {
+                            if (!visitanteAGomon.containsKey(conductor)) { // si no esta en el hash, lo crea
                                 gomon = new Gomon(conductor, pasajero);
                                 visitanteAGomon.put(conductor, gomon);
                                 visitanteAGomon.put(pasajero, gomon);
@@ -232,7 +156,7 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.acquire();
 
-                    if (!actividadIniciada) {
+                    if (!actividadIniciada) { // si la actividad no esta iniciada incrementa los participantes y puede correr
                         participantes++;
                         puedeCorrer = true;
                     } else {
@@ -241,11 +165,11 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.release();
 
-                    if (esConductor) {
+                    if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un doble o de un individual
                         gomonesListos.release();
                     }
 
-                    if (puedeCorrer) {
+                    if (puedeCorrer) { // si puede correr pone su bolso y espera
 
                         bolso = ponerBolso(visitante);
 
@@ -289,6 +213,8 @@ public class CarreraGomones implements Atraccion {
 
             if (visitante != null && gomon != null) {
 
+                // libera en base a si no es doble o bien es doble y es conductor
+
                 if (!gomon.esDoble()) {
                     gomonesIndividuales.release();
                 } else if (gomon.esConductor(visitante)) {
@@ -296,6 +222,9 @@ public class CarreraGomones implements Atraccion {
                 }
 
                 if (hayGanador.compareAndSet(false, true)) {
+
+                    // como siempre se dan fichas en nuestro programa, a el/los ganadores se le dan
+                    // varias fichas
 
                     for (int i = 0; i < 3; i++) {
                         visitante.agregarFicha("CG");
@@ -318,7 +247,7 @@ public class CarreraGomones implements Atraccion {
                 mutex.acquire();
                 llegados++;
 
-                if (llegados == participantesCarrera) {
+                if (llegados == participantesCarrera) { // si es el ultimo que llega, termina la carrera y se restablecen los valores
 
                     System.out.println("TERMINA LA CARRERA");
 
@@ -339,6 +268,98 @@ public class CarreraGomones implements Atraccion {
             System.out.println(e);
         }
     }
+
+    // metodos privados del recurso compartido
+
+    private void llegarEnTren() {
+        // metodo que maneja la llegada en tren
+        try {
+            trenBarrier.await(6, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            System.out.println("Tren no se lleno o hubo un problema, va en bici");
+            llegarEnBici(); // si no se llena, se van en bici
+        }
+    }
+
+    private void llegarEnBici() {
+        // llega en bici
+        System.out.println("Llega en bicicleta al inicio");
+    }
+
+    private Bolso ponerBolso(Visitante visitante) {
+        Bolso bolso = new Bolso(new Random().nextInt(1000), visitante); // se crea un bolso al azar por cada visitante
+
+        try {
+            bolsosEnViaje.put(bolso); // se pone en la cola
+            System.out.println("Bolso " + bolso.obtenerId() + " enviado del visitante " + visitante.obtenerNombre());
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        }
+
+        return bolso;
+    }
+
+    private void retirarBolso(Visitante visitante) {
+
+        boolean encontrado = false;
+
+        while (!encontrado) { // cicla hasta encontrar el bolso
+            try {
+                Bolso bolso = bolsosEnFinal.take();
+
+                if (bolso.obtenerDuenio() == visitante) { // si lo encuentra, frena y se lo lleva
+                    System.out.println(
+                            "Visitante " + visitante.obtenerNombre() + " retira su bolso " + bolso.obtenerId());
+                    encontrado = true;
+                } else {
+                    bolsosEnFinal.put(bolso); // si no lo encuentra lo devuelve
+                }
+
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+        }
+    }
+
+    // metodo que hace el hilo camioneta
+
+    public void transportarBolso() {
+        Bolso bolso;
+        try {
+            bolso = bolsosEnViaje.take();
+            bolsosEnFinal.put(bolso);
+            System.out.println("Bolso " + bolso.obtenerId() + " llego al final");
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        }
+    }
+    
+    // metodo que hace el hilo encargado carrera gomones
+
+    public void habilitarCarrera() {
+
+        try {
+
+            // espera el encargado a que esten todos los gomones listos
+
+            gomonesListos.acquire(GOMONES_PARA_LARGAR);
+
+            mutex.acquire();
+            actividadIniciada = true;
+            participantesCarrera = participantes;
+            mutex.release();
+
+            System.out.println("EMPIEZA LA CARRERA");
+
+            semaforoEntrada.release(participantesCarrera);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+    // metodos de la interfaz
 
     public void cerrarActividad() {
         try {
@@ -366,7 +387,6 @@ public class CarreraGomones implements Atraccion {
         return "CG";
     }
 
-    @Override
     public void abrirActividad() {
         try {
             mutex.acquire();

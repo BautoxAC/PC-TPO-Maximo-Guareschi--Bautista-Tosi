@@ -10,6 +10,10 @@ public class Propietario extends Thread {
         this.parque = parque;
     }
 
+    // hilo encargado de manejar la hora del parque
+
+    // en base al estado actual del parque que se termina por el horario hace una cosa u otra
+
     public void run() {
         while (true) {
             parque.aumentarHorario();
@@ -18,18 +22,18 @@ public class Propietario extends Thread {
 
             if (!parque.estaAbierto()) {
 
-                if (parque.obtenerEstadoActual() == 1) {
+                if (parque.obtenerEstadoActual() == 1) { // abre parque
                     System.out.println("se abre el parque");
                     parque.abrirActividades();
                     parque.abrirParque();
-                } else if (parque.actividadesHabilitadas() && parque.obtenerEstadoActual() == 2) {
+                } else if (parque.actividadesHabilitadas() && parque.obtenerEstadoActual() == 2) { // cierra actividades
                     System.out.println("SE CIERRAN LAS ACTIVIDADES ......................");
                     parque.cerrarActividades();
                 }
 
             } else {
 
-                if (parque.obtenerEstadoActual() == 3) {
+                if (parque.obtenerEstadoActual() == 3) { // cierra parque
                     System.out.println("SE CIERRA EL PARQUE");
                     parque.cerrarParque();
                 }

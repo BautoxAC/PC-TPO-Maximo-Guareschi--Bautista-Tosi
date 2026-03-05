@@ -47,33 +47,7 @@ public class MontaniaRusa implements Atraccion {
     
     }
 
-    public void esperarLlenarse() {
-
-        try {
-            inicioTren.acquire();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-    }
-
-    public void llegar() {
-
-        try {
-
-            barreraFinal.await();
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-    }
-
-    private void manejarFaltaDeGente() {
-
-        lugares.release();
-
-    }
+    // metodos que hace el visitante
 
     public boolean entrar() {
 
@@ -89,7 +63,7 @@ public class MontaniaRusa implements Atraccion {
 
                 mutex.release();
                 lugares.acquire();
-                barreraInicio.await(15, TimeUnit.SECONDS);
+                barreraInicio.await(15, TimeUnit.SECONDS); // espera 15 segundos en la barrera 15 segundos, si no se llena se rompe y se va
                 mutex.acquire();
 
                 cantEsperando--;
@@ -100,11 +74,7 @@ public class MontaniaRusa implements Atraccion {
 
             mutex.release();
 
-        } catch (TimeoutException time) {
-
-            manejarFaltaDeGente();
-
-        } catch (BrokenBarrierException time) {
+        } catch (TimeoutException | BrokenBarrierException time) {
 
             manejarFaltaDeGente();
         
@@ -128,6 +98,40 @@ public class MontaniaRusa implements Atraccion {
 
     }
 
+    // metodos que hace el hilo tren montaña rusa
+
+    public void esperarLlenarse() {
+
+        try {
+            inicioTren.acquire();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+    public void llegar() {
+
+        try {
+
+            barreraFinal.await();
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+    // metodos privados del recurso compartido
+
+    private void manejarFaltaDeGente() {
+
+        lugares.release();
+
+    }
+   
+    // metodos de la interfaz atraccion
+
     public void cerrarActividad() {
         try {
             mutex.acquire();
@@ -146,7 +150,6 @@ public class MontaniaRusa implements Atraccion {
         return "MR";
     }
 
-     @Override
     public void abrirActividad() {
         try {
             mutex.acquire();

@@ -1,7 +1,6 @@
 package Objetos;
 
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import Hilos.*;
@@ -9,13 +8,13 @@ import Recursos_Compartidos.*;
 
 public class Parque {
 
-    private Semaphore molinetes;
+    private Semaphore molinetes; // molinetes para el paso de los visitantes al parque
 
-    public Atraccion[] atracciones;
-    public AreaPremios areaPremios;
+    public Atraccion[] atracciones; // arreglo de las atracciones
+    public AreaPremios areaPremios; // area de premios (no es atraccion)
 
-    private AtomicBoolean parqueAbierto;
-    private boolean actividadesAbiertas;
+    private AtomicBoolean parqueAbierto; // booleano atomico para determinar si el parque esta abierto o no
+    private boolean actividadesAbiertas; // booleano para saber si las actividades estan abiertas o no
     private int hora;
 
     public Parque(int cantMolinetes) {
@@ -26,6 +25,9 @@ public class Parque {
         this.actividadesAbiertas = false;
 
         this.hora = 8;
+
+        // se inicializan los objetos y los hilos correspondientes, como son del parque y estan dentro de el
+        // se hace en parque y no en otro lugar
 
         atracciones = new Atraccion[6];
         atracciones[0] = new MontaniaRusa();
@@ -57,7 +59,11 @@ public class Parque {
 
     }
 
+    // metodos que hace el visitante a la hora de entrar al parque
+
     public boolean intentarEntrar() {
+
+        // metodo que hace el visitante para tratar de entrar al parque
 
         boolean exito = false;
 
@@ -80,6 +86,8 @@ public class Parque {
         molinetes.release();
 
     }
+
+    // metodos de manejo del parque (abrir/cerrar parque, abrir/cerrar actividades y aumentar horario por parte del propietario)
 
     public void abrirParque() {
 
@@ -138,17 +146,72 @@ public class Parque {
 
     }
 
+    public void aumentarHorario() {
+
+        hora = (hora + 1) % 24;
+
+    }
+
+    // metodos de areapremios invocados por el visitante
+
+    public Premio entrarAreaPremios() {
+        return areaPremios.canjear();
+    }
+
+    public int canjearSaldo() {
+
+        // metodo que hace el visitante para canjear las fichas por saldo
+
+        return areaPremios.canjearSaldo();
+    }
+    
+    // metodos traductores y de obtencion de valores
+
+    public boolean estaAbierto() {
+        return this.parqueAbierto.get();
+    }
+
+    public boolean actividadesHabilitadas() {
+
+        // metodo que devuelve si las actividades estan abiertas o no
+
+        return actividadesAbiertas;
+    }
 
     public Atraccion obtenerAtraccion(String actividad) {
+
+        // metodo para obtener la atraccion del arreglo en base al nombre
 
         return atracciones[this.traducirActividad(actividad)];
 
     }
 
-    // Metodo que recibe le actividad y devuelve el numero correspondiente para las
-    // fichas y las actividades
+    public int obtenerHora() {
+        return hora;
+    }
+
+    public int obtenerEstadoActual() {
+
+        // metodo que, en base a la hora, se devuelve un estado para determinar que hace el propietario del parque (hilo propietario)
+
+        int estado = 0;
+
+        if (hora >= 9 && hora <= 17) {
+            estado = 1; // se abre el parque
+        } else if (hora == 18) {
+            estado = 3; // se cierra el parque
+        } else if (hora == 19) {
+            estado = 2; // se cierran las actividades
+        }
+        
+        return estado;
+
+    }
 
     public int traducirActividad(String actividad) {
+
+        // Metodo que recibe le actividad y devuelve el numero correspondiente para las
+        // fichas y las actividades
 
         int num;
 
@@ -182,6 +245,8 @@ public class Parque {
 
     public int obtenerValoresFicha(String actividad) {
 
+        // metodo para saber cuanto se da de cada ficha al terminar una actividad
+
         int num;
 
         switch (actividad) {
@@ -204,48 +269,6 @@ public class Parque {
 
         return num;
 
-    }
-
-    public boolean estaAbierto() {
-        return this.parqueAbierto.get();
-    }
-
-    public int canjearSaldo() {
-        return areaPremios.canjearSaldo();
-    }
-
-    public Premio entrarAreaPremios() {
-        return areaPremios.canjear();
-    }
-
-    public void aumentarHorario() {
-
-        hora = (hora + 1) % 24;
-
-    }
-
-    public int obtenerEstadoActual() {
-
-        int estado = 0;
-
-        if (hora >= 9 && hora <= 17) {
-            estado = 1; // se abre el parque
-        } else if (hora == 18) {
-            estado = 3; // se cierra el parque
-        } else if (hora == 19) {
-            estado = 2; // se cierran las actividades
-        }
-        
-        return estado;
-
-    }
-
-    public int obtenerHora() {
-        return hora;
-    }
-
-    public boolean actividadesHabilitadas() {
-        return actividadesAbiertas;
     }
 
 

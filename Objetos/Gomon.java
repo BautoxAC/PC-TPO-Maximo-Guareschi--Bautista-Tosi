@@ -4,16 +4,18 @@ import Hilos.Visitante;
 
 public class Gomon {
 
-    private boolean esDoble;
-    private Visitante conductor;
-    private Visitante pasajero;
+    // gomon que se utiliza en carreragomones
 
-    public Gomon(Visitante conductor) {
+    private boolean esDoble; // si es doble o no
+    private Visitante conductor; // quien conduce
+    private Visitante pasajero; // el pasajero si es doble
+
+    public Gomon(Visitante conductor) { // constructor para gomon individual
         this.esDoble = false;
         this.conductor = conductor;
     }
 
-    public Gomon(Visitante conductor, Visitante pasajero) {
+    public Gomon(Visitante conductor, Visitante pasajero) { // constructor para gomon doble
         this.esDoble = true;
         this.conductor = conductor;
         this.pasajero = pasajero;
@@ -31,7 +33,7 @@ public class Gomon {
         return pasajero;
     }
 
-    public Visitante obtenerPareja(Visitante visitante) {
+    public Visitante obtenerPareja(Visitante visitante) { // en el caso de que sea doble, la pareja es el pasajero, en el otro caso es el conductor
 
         Visitante retorno = null;
 

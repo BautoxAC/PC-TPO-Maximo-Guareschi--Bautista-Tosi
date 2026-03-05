@@ -2,6 +2,9 @@ package Objetos;
 
 public class Premio {
 
+
+    //
+
     private String nombre;
     private int costo;
 
