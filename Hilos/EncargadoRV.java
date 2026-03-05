@@ -9,7 +9,7 @@ public class EncargadoRV implements Runnable {
     public EncargadoRV(RealidadVirtual rv) {
         this.rv = rv;
     }
-    // Encarado de la Realidad virtual y se encarga de poner 
+    // Encargado de la Realidad virtual
     @Override
     public void run() {
         while (true) {

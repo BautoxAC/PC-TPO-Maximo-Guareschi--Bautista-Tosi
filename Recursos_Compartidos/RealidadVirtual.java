@@ -46,8 +46,6 @@ public class RealidadVirtual implements Atraccion {
 
                 // Intenta sacar un visor
                 String Visor = equipo[0].poll(2, TimeUnit.SECONDS);
-                System.out.println("HOLAAAAAAAAAAAAAAAAAAAAAAAAA");
-                System.out.println(Visor);
                 if (Visor != null) {
                     // Intenta sacar dos manoplas
                     String manopla = equipo[1].poll(2, TimeUnit.SECONDS);
@@ -143,6 +141,8 @@ public class RealidadVirtual implements Atraccion {
         return actividadAbierta.get();
     }
 
+    //Espera que este listo un visitante
+
     public void esperarListo() {
         try {
             encargado.acquire();
@@ -151,6 +151,7 @@ public class RealidadVirtual implements Atraccion {
         }
     }
 
+    //Deja pasar al visitante
     public void liberaEntrada() {
         try {
             revisar.release();
@@ -158,7 +159,8 @@ public class RealidadVirtual implements Atraccion {
             System.out.println(e);
         }
     }
- // Se cargan las partes en la RV
+
+    // Se cargan las partes en la RV
     public void ponerPartes(int i) {
         try {
             for (int j = 0; j < capacidades[i]; j++) {
