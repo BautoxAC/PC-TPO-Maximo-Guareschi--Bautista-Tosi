@@ -7,13 +7,13 @@ import Objetos.*;
 public class Visitante extends Thread {
 
     private String nombre;
-    private int[] fichas;
+    private int[] fichas; // arreglo de las fichas
     private Parque parque;
     private int saldo;
 
-    private Atraccion atraccion;
+    private Atraccion atraccion; // atraccion elegida actual
 
-    private boolean enParque;
+    private boolean enParque; // variable para saber si esta o no en parque
 
     public Visitante(String nombre, Parque parque) {
 
@@ -44,7 +44,7 @@ public class Visitante extends Thread {
 
                 System.out.println("El visitante "+nombre+" se va a dormir ...");
 
-                Thread.sleep(20000);
+                Thread.sleep(20000); // cuando sale o no pudo entrar, se va a dormir antes de volver a tratar de entrar al parque
 
             }
 
@@ -54,35 +54,13 @@ public class Visitante extends Thread {
 
     }
 
-    public String obtenerNombre() {
-        return nombre;
-    }
-
-    public int obtenerFichas(String ficha) {
-        return fichas[parque.traducirActividad(ficha)];
-    }
-
-    public void sacarFichas() {
-        for (int i = 0; i < fichas.length; i++) {
-            fichas[i] = 0;
-        }
-    }
-
-    public void agregarFicha(String ficha) {
-
-        int cantidadAAumentar = parque.obtenerValoresFicha(ficha);
-
-        if (cantidadAAumentar != 0) {
-            fichas[parque.traducirActividad(ficha)] += cantidadAAumentar;
-        }
-
-    }
+    // metodo de entrar al parque
 
     private boolean entrarParque() {
 
         System.out.println(nombre + " trata de entrar al parque");
 
-        boolean exito = parque.intentarEntrar();
+        boolean exito = parque.intentarEntrar(); // metodo de entrar al parque
 
         try {
 
@@ -95,7 +73,7 @@ public class Visitante extends Thread {
                         + " no pudo entrar ........ parque cerrado");
             }
 
-            parque.liberarMolinete();
+            parque.liberarMolinete(); // libera el molinete cuando termina de pasar
 
         } catch (Exception e) {
             System.out.println(e);
@@ -105,6 +83,8 @@ public class Visitante extends Thread {
 
     }
 
+    // metodos PRIVADOS de fichas (tiene y canjear)
+
     private boolean tieneFichas() {
         int cantidadTotal = 0;
 
@@ -112,14 +92,14 @@ public class Visitante extends Thread {
             cantidadTotal += fichas[i];
         }
 
-        return (cantidadTotal > 30 || saldo > 30);
+        return (cantidadTotal > 30 || saldo > 30); // si tiene mas de 30 de saldo o tiene mas de 30 fichas en total, puede entrar a areapremios
     }
 
     private void canjearFichas() {
 
-        this.saldo += parque.canjearSaldo();
+        this.saldo += parque.canjearSaldo(); // canjea las fichas por saldo
 
-        Premio premio = parque.entrarAreaPremios();
+        Premio premio = parque.entrarAreaPremios(); // recibe el premio correspondiente
 
         if (premio != null) {
             System.out.println("El visitante " + nombre + " recibio el premio ");
@@ -127,13 +107,15 @@ public class Visitante extends Thread {
 
     }
 
+    // metodos PRIVADOS de actividades (elegir y realizar)
+
     private String elegirActividad() {
 
         String actividad;
         int decision;
         Random random = new Random();
 
-        decision = random.nextInt(10) + 1;
+        decision = random.nextInt(10) + 1; // toma una decicion, con un numero random del 1 al 10
 
         if (!parque.estaAbierto()) {
             decision = 10;
@@ -159,7 +141,7 @@ public class Visitante extends Thread {
             actividad = "AreaPremios";
         }
 
-        return actividad;
+        return actividad; // retorna la actividad elegida
 
     }
 
@@ -171,13 +153,13 @@ public class Visitante extends Thread {
 
         try {
 
-            while (enParque) {
+            while (enParque) { // mientras este dentro del parque, elige una actividad
 
                 actividad = elegirActividad();
 
                 System.out.println(nombre + " TRATA DE ENTRAR a la actividad " + actividad);
 
-                if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) {
+                if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) { // si no es salir no areapremios, es una atraccion
                     atraccion = parque.obtenerAtraccion(actividad);
 
                     resultado = atraccion.entrar();
@@ -212,17 +194,9 @@ public class Visitante extends Thread {
 
     }
 
-    
+    // metodo de esperar
 
-    public int obtenerSaldo() {
-        return this.saldo;
-    }
-
-    public void sacarSaldo(int saldo) {
-        this.saldo -= saldo;
-    }
-
-    private void esperarTiempo(String actividad) {
+    private void esperarTiempo(String actividad) { // esperan con respecto a la actividad elegida
         try {
             if (actividad.equals("RV")) {
                 Thread.sleep(1500);
@@ -230,7 +204,7 @@ public class Visitante extends Thread {
                 System.out.println("El visitante esta yendo en la carrera ....");
                 Thread.sleep(3000);
             } else if (actividad.equals("CO")) {
-                System.out.println("El visitante esta yendo en la carrera ....");
+                System.out.println("El visitante come ....");
                 Thread.sleep(5000);
             }
         } catch (Exception e) {
@@ -238,5 +212,44 @@ public class Visitante extends Thread {
         }
 
     }
+
+    // metodo de sacar saldo
+
+    public void sacarSaldo(int saldo) {
+        this.saldo -= saldo;
+    }
+
+    // metodos de modificar fichas
+
+    public void sacarFichas() { // metodo para sacar todas las fichas cuando se transforman en saldo
+        for (int i = 0; i < fichas.length; i++) {
+            fichas[i] = 0;
+        }
+    }
+
+    public void agregarFicha(String ficha) {
+
+        int cantidadAAumentar = parque.obtenerValoresFicha(ficha); // obtiene de parque cuanto vale la ficha
+
+        if (cantidadAAumentar != 0) {
+            fichas[parque.traducirActividad(ficha)] += cantidadAAumentar; // obtiene de parque la posicion del arreglo de la ficha y suma su valor
+        }
+
+    }
+
+    // metodos de obtenecion de datos (getters)
+
+    public String obtenerNombre() {
+        return nombre;
+    }
+
+    public int obtenerFichas(String ficha) {
+        return fichas[parque.traducirActividad(ficha)]; // obtiene de parque la posicion del arreglo en base al nombre de la ficha
+    }
+
+    public int obtenerSaldo() {
+        return this.saldo;
+    }
+
 
 }

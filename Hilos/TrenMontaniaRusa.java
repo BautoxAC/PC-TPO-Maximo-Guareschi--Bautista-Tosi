@@ -12,6 +12,8 @@ public class TrenMontaniaRusa implements Runnable {
 
     }
 
+    // hilo encargado de esperar a la montaña rusa a que se llene
+
     public void run() {
 
         try {
@@ -20,7 +22,7 @@ public class TrenMontaniaRusa implements Runnable {
 
                 System.out.println("Espera a que se llene el tren de la montaña rusa .......");
 
-                montaniaRusa.esperarLlenarse();
+                montaniaRusa.esperarLlenarse(); // se bloquea esperando a que se llene
 
                 System.out.println("El tren de la montaña rusa inicia el recorrido .....");
 

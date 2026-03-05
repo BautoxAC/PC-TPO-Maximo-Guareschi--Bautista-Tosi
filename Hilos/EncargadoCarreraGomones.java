@@ -12,6 +12,8 @@ public class EncargadoCarreraGomones implements Runnable {
 
     }
 
+    // encargado de iniciar la carrera de gomones
+
     public void run() {
 
         try {
@@ -20,7 +22,7 @@ public class EncargadoCarreraGomones implements Runnable {
 
                 System.out.println("Espera a que hayan gomones para la carrera .......");
 
-                carreraGomones.habilitarCarrera();
+                carreraGomones.habilitarCarrera(); // se bloquea esperando a que esten todos los gomones
 
                 System.out.println("COMIENZA LA CARRERA DE GOMONES .....");
 

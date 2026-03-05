@@ -12,6 +12,8 @@ public class EncargadoAutitos implements Runnable {
 
     }
 
+    // encargado de iniciar los autitos chocadores
+
     public void run() {
 
         try {
@@ -20,11 +22,11 @@ public class EncargadoAutitos implements Runnable {
 
                 System.out.println("Espera a que se llenen los autitos chocadores .......");
 
-                autitosChocadores.esperarLlenarse();
+                autitosChocadores.esperarLlenarse(); // espera a que se llenen los autitos chocadores
 
                 System.out.println("Comienzan los autitos chocadores .....");
 
-                Thread.sleep(13000);
+                Thread.sleep(7000);
 
                 autitosChocadores.salir();
 
