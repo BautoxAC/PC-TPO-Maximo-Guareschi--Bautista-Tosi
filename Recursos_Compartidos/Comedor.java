@@ -37,16 +37,22 @@ public class Comedor implements Atraccion {
         Mesa mesaActual;
         Visitante visitante = (Visitante) Thread.currentThread();
         lockPersonas.lock();
+        //Revisa que no este llena la actividad y este abierta
         if (personasDentro < limitePersonas && actividadAbierta) {
             personasDentro++;
             lockPersonas.unlock();
+
+            // Si o si encuentra mesa, ya que hay limite de personas y este metodo busca hasta que encuentra, no termina
             mesaActual = this.buscarNoComiendoYReservarLugar();
             entro = mesaActual.entrarMesa();
+            
+            //Normalmente sino entro es porque falto gente
             if (!entro) {
                 lockPersonas.lock();
                 personasDentro--;
                 lockPersonas.unlock();
             } else {
+                // Se relaciona el visitante con la mesa para despues poder obtenerla al salir
                 visitanteAMesa.put(visitante, mesaActual);
             }
         } else {
@@ -62,6 +68,7 @@ public class Comedor implements Atraccion {
         Visitante visitante;
         Mesa mesaActual;
         try {
+            // Busca la mesa del hash
             visitante = (Visitante) Thread.currentThread();
             mesaActual = visitanteAMesa.remove(visitante);
             mesaActual.salirMesa();

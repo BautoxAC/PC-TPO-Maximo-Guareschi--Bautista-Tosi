@@ -31,12 +31,13 @@ public class Mesa {
         return this.Num;
     }
 
+    // aca no se controla nada, ya que  si o si encuentra una mesa para entrar
     public boolean entrarMesa() {
         boolean entro = false;
         try {
             try {
-                inicioComer.await(15, TimeUnit.SECONDS);
-                entro = true;
+                     inicioComer.await(15, TimeUnit.SECONDS);
+                     entro = true;
             } catch (Exception e) {
                 entro = false;
             }
@@ -47,6 +48,8 @@ public class Mesa {
         return entro;
     }
 
+    // Este metodo realiza la reserva de lugar de la persona, donde podria haber una
+    // condicion de carrera entre que esten comiendo y efectivamente sentarse
     public boolean reservarLugar() {
         boolean reservo = false;
         try {

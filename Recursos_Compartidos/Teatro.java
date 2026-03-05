@@ -19,19 +19,24 @@ public class Teatro implements Atraccion {
 
     public Teatro() {
         mutex = new Semaphore(1);
+
         actividadAbierta = false;
         estaEncurso = false;
         cantGrupo = 5;
         gruposAdentro = 0;
+
+        // este semaforo es para que despues de cerrado el encargado del teatro no sigo
+        // haciendo obras y se vaya a dormir
         teatro = new Semaphore(0);
         cupos = new Semaphore(cantGrupo * 4);
         salirGrupos = new Semaphore(0);
+
         entrarGrupo = new CyclicBarrier(cantGrupo, () -> {
             try {
                 mutex.acquire();
                 gruposAdentro++;
                 mutex.release();
-                System.out.println("Entro el grupo numero " + gruposAdentro  );
+                System.out.println("Entro el grupo numero " + gruposAdentro);
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -45,6 +50,8 @@ public class Teatro implements Atraccion {
         boolean entro = false;
         try {
             mutex.acquire();
+            // Revisa que este abierta la actvidad, no este en curso la obra y haya espacio
+            // con los cupos
             if (actividadAbierta && !estaEncurso && cupos.tryAcquire()) {
 
                 mutex.release();
@@ -83,6 +90,7 @@ public class Teatro implements Atraccion {
 
     public void sacarEnCurso() {
         try {
+            // habilita la entrada de personas
             mutex.acquire();
             cupos.release(gruposAdentro * 5);
             gruposAdentro = 0;

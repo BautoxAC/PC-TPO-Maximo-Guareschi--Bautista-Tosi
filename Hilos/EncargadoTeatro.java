@@ -8,7 +8,8 @@ public class EncargadoTeatro implements Runnable {
     public EncargadoTeatro(Teatro teatro) {
         this.teatro = teatro;
     }
-
+    // Encargado del flujo del teatro
+    
     @Override
     public void run() {
         while (true) {
