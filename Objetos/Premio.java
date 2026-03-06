@@ -3,7 +3,7 @@ package Objetos;
 public class Premio {
 
 
-    //
+    //Se usa en areaPremios para determinar un Premio
 
     private String nombre;
     private int costo;
