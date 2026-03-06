@@ -88,13 +88,13 @@ public class RealidadVirtual implements Atraccion {
             }
 
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e);
             try {
                 mutex.acquire();
                 cantEsperando--;
                 mutex.release();
             } catch (Exception e2) {
-                // TODO: handle exception
+                System.out.println(e);
             }
 
         }
