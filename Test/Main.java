@@ -2,7 +2,7 @@ package Test;
 
 import Hilos.Propietario;
 import Hilos.Visitante;
-import Objetos.Parque;
+import Recursos_Compartidos.Parque;
 
 public class Main {
     public static void main (String[] args) {

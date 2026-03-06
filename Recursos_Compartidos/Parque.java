@@ -1,10 +1,11 @@
-package Objetos;
+package Recursos_Compartidos;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import Hilos.*;
-import Recursos_Compartidos.*;
+import Objetos.Atraccion;
+import Objetos.Premio;
 
 public class Parque {
 

@@ -3,6 +3,7 @@ package Hilos;
 import java.util.Random;
 
 import Objetos.*;
+import Recursos_Compartidos.Parque;
 
 public class Visitante extends Thread {
 

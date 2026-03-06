@@ -1,6 +1,6 @@
 package Hilos;
 
-import Objetos.Parque;
+import Recursos_Compartidos.Parque;
 
 public class Propietario extends Thread {
 
