@@ -1,8 +1,10 @@
 package Recursos_Compartidos;
 
+import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import Objetos.Atraccion;
 
@@ -61,6 +63,14 @@ public class Teatro implements Atraccion {
             } else {
                 mutex.release();
             }
+
+        }
+       catch (TimeoutException | BrokenBarrierException time) {
+
+            cupos.release();
+            entrarGrupo.reset();
+            System.out.println(time);
+
         } catch (Exception e) {
             cupos.release();
             System.out.println(e);

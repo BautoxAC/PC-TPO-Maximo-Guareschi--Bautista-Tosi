@@ -111,7 +111,9 @@ public class CarreraGomones implements Atraccion {
 
                     try {
 
-                        pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS); // si no encuentra pareja en 3 segundos, se devuelve el permiso de gomonesDobles
+                        pareja = exchangerDoble.exchange(visitante, 3, TimeUnit.SECONDS); // si no encuentra pareja en 3
+                                                                                          // segundos, se devuelve el
+                                                                                          // permiso de gomonesDobles
 
                         comparacion = visitante.obtenerNombre().compareTo(pareja.obtenerNombre());
 
@@ -156,7 +158,8 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.acquire();
 
-                    if (!actividadIniciada) { // si la actividad no esta iniciada incrementa los participantes y puede correr
+                    if (!actividadIniciada) { // si la actividad no esta iniciada incrementa los participantes y puede
+                                              // correr
                         participantes++;
                         puedeCorrer = true;
                     } else {
@@ -165,7 +168,8 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.release();
 
-                    if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un doble o de un individual
+                    if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un
+                                       // doble o de un individual
                         gomonesListos.release();
                     }
 
@@ -247,7 +251,8 @@ public class CarreraGomones implements Atraccion {
                 mutex.acquire();
                 llegados++;
 
-                if (llegados == participantesCarrera) { // si es el ultimo que llega, termina la carrera y se restablecen los valores
+                if (llegados == participantesCarrera) { // si es el ultimo que llega, termina la carrera y se
+                                                        // restablecen los valores
 
                     System.out.println("TERMINA LA CARRERA");
 
@@ -275,6 +280,10 @@ public class CarreraGomones implements Atraccion {
         // metodo que maneja la llegada en tren
         try {
             trenBarrier.await(6, TimeUnit.SECONDS);
+        } catch (BrokenBarrierException | TimeoutException r) {
+            trenBarrier.reset();
+            System.out.println("Tren no se lleno o hubo un problema, va en bici");
+            llegarEnBici();
         } catch (Exception e) {
             System.out.println("Tren no se lleno o hubo un problema, va en bici");
             llegarEnBici(); // si no se llena, se van en bici
@@ -333,7 +342,7 @@ public class CarreraGomones implements Atraccion {
             System.out.println(e);
         }
     }
-    
+
     // metodo que hace el hilo encargado carrera gomones
 
     public void habilitarCarrera() {
