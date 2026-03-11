@@ -76,7 +76,9 @@ public class MontaniaRusa implements Atraccion {
 
         } catch (TimeoutException | BrokenBarrierException time) {
 
-            barreraInicio.reset();
+            if (barreraInicio.isBroken()) {
+                barreraInicio.reset();
+            }
             manejarFaltaDeGente();
         
         } catch (Exception e) {

@@ -68,7 +68,9 @@ public class Teatro implements Atraccion {
        catch (TimeoutException | BrokenBarrierException time) {
 
             cupos.release();
-            entrarGrupo.reset();
+            if (entrarGrupo.isBroken()) {
+                entrarGrupo.reset();
+            }
             System.out.println(time);
 
         } catch (Exception e) {

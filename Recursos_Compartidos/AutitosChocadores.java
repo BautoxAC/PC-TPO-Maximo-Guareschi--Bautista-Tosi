@@ -86,7 +86,9 @@ public class AutitosChocadores implements Atraccion {
             inicio.await(); // como ya pasaron la condition del lugar, esa cantidad de personas esperan en inicio
             return true;
         } catch (InterruptedException | BrokenBarrierException e) {
-            inicio.reset();
+            if (inicio.isBroken()) {
+                inicio.reset();
+            }
             return false;
         }
     }
@@ -97,7 +99,9 @@ public class AutitosChocadores implements Atraccion {
         try {
             fin.await();
         } catch (InterruptedException | BrokenBarrierException e) {
-            fin.reset();
+            if (fin.isBroken()) {
+                fin.reset();
+            }
             System.out.println(e);
         }
     }

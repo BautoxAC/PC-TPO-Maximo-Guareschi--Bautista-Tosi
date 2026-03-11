@@ -281,7 +281,9 @@ public class CarreraGomones implements Atraccion {
         try {
             trenBarrier.await(6, TimeUnit.SECONDS);
         } catch (BrokenBarrierException | TimeoutException r) {
-            trenBarrier.reset();
+            if (trenBarrier.isBroken()) {
+                trenBarrier.reset();
+            }
             System.out.println("Tren no se lleno o hubo un problema, va en bici");
             llegarEnBici();
         } catch (Exception e) {
