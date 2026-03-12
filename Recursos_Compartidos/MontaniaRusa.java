@@ -17,6 +17,7 @@ public class MontaniaRusa implements Atraccion {
 
     private Semaphore inicioTren;
     private Semaphore mutex;
+    private Semaphore mutexBarrera;
 
     private int cantEsperando;
 
@@ -42,9 +43,9 @@ public class MontaniaRusa implements Atraccion {
         mutex = new Semaphore(1);
 
         cantEsperando = 0;
-
+        mutexBarrera = new Semaphore(1);
         actividadAbierta = false;
-    
+
     }
 
     // metodos que hace el visitante
@@ -63,7 +64,8 @@ public class MontaniaRusa implements Atraccion {
 
                 mutex.release();
                 lugares.acquire();
-                barreraInicio.await(15, TimeUnit.SECONDS); // espera 15 segundos en la barrera 15 segundos, si no se llena se rompe y se va
+                barreraInicio.await(15, TimeUnit.SECONDS); // espera 15 segundos en la barrera 15 segundos, si no se
+                                                           // llena se rompe y se va
                 mutex.acquire();
 
                 cantEsperando--;
@@ -75,12 +77,19 @@ public class MontaniaRusa implements Atraccion {
             mutex.release();
 
         } catch (TimeoutException | BrokenBarrierException time) {
-
-            if (barreraInicio.isBroken()) {
-                barreraInicio.reset();
+            try {
+                mutexBarrera.acquire();
+                if (barreraInicio.isBroken()) {
+                    barreraInicio.reset();
+                }
+                mutexBarrera.release();
+            } catch (Exception e) {
+                mutexBarrera.release();
+                System.out.println(e);
             }
+
             manejarFaltaDeGente();
-        
+
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -94,7 +103,7 @@ public class MontaniaRusa implements Atraccion {
         try {
 
             barreraFinal.await();
-            
+
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -132,7 +141,7 @@ public class MontaniaRusa implements Atraccion {
         lugares.release();
 
     }
-   
+
     // metodos de la interfaz atraccion
 
     public void cerrarActividad() {

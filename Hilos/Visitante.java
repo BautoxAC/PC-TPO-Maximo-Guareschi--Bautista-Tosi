@@ -1,5 +1,10 @@
 package Hilos;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import java.io.IOException;
 import java.util.Random;
 
 import Objetos.*;
@@ -16,12 +21,17 @@ public class Visitante extends Thread {
 
     private boolean enParque; // variable para saber si esta o no en parque
 
-    public Visitante(String nombre, Parque parque) {
+    private WriterVisitante wri; 
 
+   
+
+    public Visitante(String nombre, Parque parque, WriterVisitante wri) {
+       
         this.nombre = nombre;
         this.fichas = new int[4];
         this.parque = parque;
         this.saldo = 0;
+        this.wri= wri;
 
         this.enParque = false;
 
@@ -43,9 +53,10 @@ public class Visitante extends Thread {
 
                 }
 
-                System.out.println("El visitante "+nombre+" se va a dormir ...");
+                wri.escribir("El visitante " + nombre + " se va a dormir ...");
 
-                Thread.sleep(20000); // cuando sale o no pudo entrar, se va a dormir antes de volver a tratar de entrar al parque
+                Thread.sleep(20000); // cuando sale o no pudo entrar, se va a dormir antes de volver a tratar de
+                                     // entrar al parque
 
             }
 
@@ -59,25 +70,25 @@ public class Visitante extends Thread {
 
     private boolean entrarParque() {
 
-        System.out.println(nombre + " trata de entrar al parque");
+        wri.escribir(nombre + " trata de entrar al parque");
 
         boolean exito = parque.intentarEntrar(); // metodo de entrar al parque
 
         try {
 
             if (exito) {
-                System.out.println(nombre + "esta entrado al parque");
+                wri.escribir(nombre + "esta entrado al parque");
                 Thread.sleep(300);
-                System.out.println(nombre + "entro al parque");
+                wri.escribir(nombre + " entro al parque");
             } else {
-                System.out.println(nombre
+                wri.escribir(nombre
                         + " no pudo entrar ........ parque cerrado");
             }
 
             parque.liberarMolinete(); // libera el molinete cuando termina de pasar
 
         } catch (Exception e) {
-            System.out.println(e);
+           System.out.println(e);
         }
 
         return exito;
@@ -93,7 +104,8 @@ public class Visitante extends Thread {
             cantidadTotal += fichas[i];
         }
 
-        return (cantidadTotal > 30 || saldo > 30); // si tiene mas de 30 de saldo o tiene mas de 30 fichas en total, puede entrar a areapremios
+        return (cantidadTotal > 30 || saldo > 30); // si tiene mas de 30 de saldo o tiene mas de 30 fichas en total,
+                                                   // puede entrar a areapremios
     }
 
     private void canjearFichas() {
@@ -103,7 +115,7 @@ public class Visitante extends Thread {
         Premio premio = parque.entrarAreaPremios(); // recibe el premio correspondiente
 
         if (premio != null) {
-            System.out.println("El visitante " + nombre + " recibio el premio ");
+            wri.escribir("El visitante " + nombre + " recibio el premio ");
         }
 
     }
@@ -128,17 +140,17 @@ public class Visitante extends Thread {
             actividad = "AC";
         } else if (decision <= 4) {
             actividad = "RV";
-        } else if (decision <= 6 ) {
+        } else if (decision <= 6) {
             actividad = "CG";
         } else if (decision <= 7) {
             actividad = "CO";
-        } else if (decision <=9 ) {
+        } else if (decision <= 9) {
             actividad = "TE";
         } else {
             actividad = "Salir";
         }
 
-        if ( decision == 8 && tieneFichas()) {
+        if (decision == 8 && tieneFichas()) {
             actividad = "AreaPremios";
         }
 
@@ -158,22 +170,23 @@ public class Visitante extends Thread {
 
                 actividad = elegirActividad();
 
-                System.out.println(nombre + " TRATA DE ENTRAR a la actividad " + actividad);
+                wri.escribir(nombre + " TRATA DE ENTRAR a la actividad " + actividad);
 
-                if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) { // si no es salir no areapremios, es una atraccion
+                if (!actividad.equals("Salir") && !actividad.equals("AreaPremios")) { // si no es salir no areapremios,
+                                                                                      // es una atraccion
                     atraccion = parque.obtenerAtraccion(actividad);
 
                     resultado = atraccion.entrar();
 
                     if (resultado) {
-                        System.out.println(nombre + " ENTRO Y ESPERA salir de actividad " + actividad);
+                        wri.escribir(nombre + " ENTRO Y ESPERA salir de actividad " + actividad);
                         this.esperarTiempo(actividad);
                         atraccion.salir();
 
                         agregarFicha(atraccion.obtenerTipoFichas());
                     }
 
-                    System.out.println(nombre + " SALE de la actividad " + actividad);
+                    wri.escribir(nombre + " SALE de la actividad " + actividad);
 
                 } else if (actividad.equals("AreaPremios")) {
 
@@ -187,7 +200,7 @@ public class Visitante extends Thread {
 
             }
 
-            System.out.println(nombre + "sale del parque ..................");
+            wri.escribir(nombre + "sale del parque ..................");
 
         } catch (Exception e) {
             System.out.println(e);
@@ -202,10 +215,10 @@ public class Visitante extends Thread {
             if (actividad.equals("RV")) {
                 Thread.sleep(1500);
             } else if (actividad.equals("CG")) {
-                System.out.println("El visitante esta yendo en la carrera ....");
+                wri.escribir("El visitante esta yendo en la carrera ....");
                 Thread.sleep(3000);
             } else if (actividad.equals("CO")) {
-                System.out.println("El visitante come ....");
+                wri.escribir("El visitante come ....");
                 Thread.sleep(5000);
             }
         } catch (Exception e) {
@@ -233,7 +246,8 @@ public class Visitante extends Thread {
         int cantidadAAumentar = parque.obtenerValoresFicha(ficha); // obtiene de parque cuanto vale la ficha
 
         if (cantidadAAumentar != 0) {
-            fichas[parque.traducirActividad(ficha)] += cantidadAAumentar; // obtiene de parque la posicion del arreglo de la ficha y suma su valor
+            fichas[parque.traducirActividad(ficha)] += cantidadAAumentar; // obtiene de parque la posicion del arreglo
+                                                                          // de la ficha y suma su valor
         }
 
     }
@@ -245,12 +259,12 @@ public class Visitante extends Thread {
     }
 
     public int obtenerFichas(String ficha) {
-        return fichas[parque.traducirActividad(ficha)]; // obtiene de parque la posicion del arreglo en base al nombre de la ficha
+        return fichas[parque.traducirActividad(ficha)]; // obtiene de parque la posicion del arreglo en base al nombre
+                                                        // de la ficha
     }
 
     public int obtenerSaldo() {
         return this.saldo;
     }
-
 
 }

@@ -19,6 +19,7 @@ public class CarreraGomones implements Atraccion {
     private Semaphore gomonesDobles;
     private Semaphore gomonesListos;
 
+    private Semaphore mutexBarrera;
     private Semaphore semaforoEntrada;
 
     private int participantesCarrera;
@@ -55,6 +56,7 @@ public class CarreraGomones implements Atraccion {
         actividadIniciada = false;
 
         mutex = new Semaphore(1);
+        mutexBarrera = new Semaphore(1);
 
         trenBarrier = new CyclicBarrier(15, () -> {
             System.out.println("TREN LLENO, va a la carrera");
@@ -81,6 +83,7 @@ public class CarreraGomones implements Atraccion {
         boolean esConductor = false;
         boolean puedeCorrer;
         Gomon gomon;
+        Gomon gomonAgarrado;
         Visitante pareja;
         int comparacion;
         Visitante conductor;
@@ -179,7 +182,21 @@ public class CarreraGomones implements Atraccion {
 
                         System.out.println("Espera a iniciar ...");
 
-                        semaforoEntrada.acquire();
+                        if (!semaforoEntrada.tryAcquire(15, TimeUnit.SECONDS)) {
+                            if (esConductor) {
+                                gomonesListos.acquire();
+                            }
+                            gomonAgarrado = visitanteAGomon.remove(visitante);
+                            if (gomonAgarrado.esDoble()) {
+                                gomonesDobles.release();
+                            }else{
+                                gomonesIndividuales.release();
+                            }
+                            mutex.acquire();
+                            participantes--;
+                            mutex.release();
+                            retirarBolso(visitante);
+                        }
 
                         exito = true;
                     }
@@ -281,11 +298,20 @@ public class CarreraGomones implements Atraccion {
         try {
             trenBarrier.await(6, TimeUnit.SECONDS);
         } catch (BrokenBarrierException | TimeoutException r) {
-            if (trenBarrier.isBroken()) {
-                trenBarrier.reset();
+            try {
+                mutexBarrera.acquire();
+                if (trenBarrier.isBroken()) {
+                    trenBarrier.reset();
+                }
+                System.out.println("Tren no se lleno o hubo un problema, va en bici");
+                llegarEnBici();
+            } catch (Exception e) {
+                System.out.println(e);
+            } finally {
+                mutexBarrera.release();
+
             }
-            System.out.println("Tren no se lleno o hubo un problema, va en bici");
-            llegarEnBici();
+
         } catch (Exception e) {
             System.out.println("Tren no se lleno o hubo un problema, va en bici");
             llegarEnBici(); // si no se llena, se van en bici

@@ -3,6 +3,7 @@ package Recursos_Compartidos;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -13,6 +14,7 @@ public class AutitosChocadores implements Atraccion {
     private int CAPACIDAD = 20;
 
     private ReentrantLock lock;
+    private ReentrantLock lockBarrera;
     private Condition hayLugar;
     private Condition encargado;
 
@@ -27,6 +29,7 @@ public class AutitosChocadores implements Atraccion {
     public AutitosChocadores() {
 
         lock = new ReentrantLock();
+        lockBarrera = new ReentrantLock();
         hayLugar = lock.newCondition();
         encargado = lock.newCondition();
 
@@ -34,7 +37,8 @@ public class AutitosChocadores implements Atraccion {
         enCurso = false;
         actividadAbierta = false;
 
-        // en las barreras, el fin es capacidad + 1 por el encargado de los autitos el cual espera una vez inicia la atraccion
+        // en las barreras, el fin es capacidad + 1 por el encargado de los autitos el
+        // cual espera una vez inicia la atraccion
         // y la rompe cuando espera el tiempo que tiene en su hilo
 
         inicio = new CyclicBarrier(CAPACIDAD, () -> {
@@ -58,13 +62,14 @@ public class AutitosChocadores implements Atraccion {
     // metodos que llaman los visitantes
 
     public boolean entrar() {
-
+        boolean exito = false;
         lock.lock();
         try {
 
             while (!actividadAbierta || enCurso || esperando == CAPACIDAD) {
                 try {
-                    hayLugar.await(14, TimeUnit.SECONDS); // si en 14 segundos no se llena, se rompe y retorna que no pudo entrar
+                    hayLugar.await(14, TimeUnit.SECONDS); // si en 14 segundos no se llena, se rompe y retorna que no
+                                                          // pudo entrar
                 } catch (InterruptedException e) {
                     System.out.println(e);
                     return false;
@@ -73,7 +78,8 @@ public class AutitosChocadores implements Atraccion {
 
             esperando++;
 
-            if (esperando == CAPACIDAD) { //si la cantidad de esperando es la capacidad, le avisa al encargado para que se despierte e inicie
+            if (esperando == CAPACIDAD) { // si la cantidad de esperando es la capacidad, le avisa al encargado para que
+                                          // se despierte e inicie
                 enCurso = true;
                 encargado.signal();
             }
@@ -83,26 +89,46 @@ public class AutitosChocadores implements Atraccion {
         }
 
         try {
-            inicio.await(); // como ya pasaron la condition del lugar, esa cantidad de personas esperan en inicio
-            return true;
-        } catch (InterruptedException | BrokenBarrierException e) {
+            inicio.await(6, TimeUnit.SECONDS); // como ya pasaron la condition del lugar, esa cantidad de personas
+                                               // esperan en
+            // inicio
+            exito = true;
+        } catch (TimeoutException | BrokenBarrierException e) {
+            lock.lock();
+            esperando--;
+            lock.unlock();
+            exito = false;
+            lockBarrera.lock();
             if (inicio.isBroken()) {
                 inicio.reset();
             }
-            return false;
+            lockBarrera.unlock();
+
+        } catch (Exception e) {
+            lock.lock();
+            esperando--;
+            lock.unlock();
+            exito = false;
+            System.out.println(e);
         }
+        return exito;
     }
 
     // metodos que llaman los dos hilos (visitantes y el encargado autitos)
 
     public void salir() {
         try {
+            
             fin.await();
+
         } catch (InterruptedException | BrokenBarrierException e) {
+            lockBarrera.lock();
             if (fin.isBroken()) {
                 fin.reset();
             }
             System.out.println(e);
+            lockBarrera.unlock();
+
         }
     }
 

@@ -12,6 +12,7 @@ public class Teatro implements Atraccion {
     private boolean actividadAbierta;
     private boolean estaEncurso;
     private Semaphore mutex;
+    private Semaphore mutexBarrera;
     private int cantGrupo;
     private Semaphore cupos;
     private CyclicBarrier entrarGrupo;
@@ -21,6 +22,7 @@ public class Teatro implements Atraccion {
 
     public Teatro() {
         mutex = new Semaphore(1);
+        mutexBarrera = new Semaphore(1);
 
         actividadAbierta = false;
         estaEncurso = false;
@@ -64,13 +66,20 @@ public class Teatro implements Atraccion {
                 mutex.release();
             }
 
-        }
-       catch (TimeoutException | BrokenBarrierException time) {
+        } catch (TimeoutException | BrokenBarrierException time) {
 
             cupos.release();
-            if (entrarGrupo.isBroken()) {
-                entrarGrupo.reset();
+            try {
+                mutexBarrera.acquire();
+                if (entrarGrupo.isBroken()) {
+                    entrarGrupo.reset();
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }finally{
+                mutexBarrera.release();
             }
+
             System.out.println(time);
 
         } catch (Exception e) {

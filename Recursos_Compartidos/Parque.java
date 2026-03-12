@@ -109,10 +109,9 @@ public class Parque {
 
         try {
 
-            this.parqueAbierto.set(false);
-            cerrarActividades();
-
             System.out.println("=== PARQUE CERRADO (18:00) ===");
+            this.parqueAbierto.set(false);
+
 
         } catch (Exception e) {
             System.out.println(e);
