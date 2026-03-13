@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import Objetos.Atraccion;
 
 public class RealidadVirtual implements Atraccion {
-    private BlockingQueue<String>[] equipo;
+    private Semaphore[] equipo;
     private int[] capacidades = { 5, 10, 5 };
     private int cantEsperando;
     private Semaphore mutex;
@@ -23,11 +23,10 @@ public class RealidadVirtual implements Atraccion {
         // para las bases
         cantEsperando = 0;
         actividadAbierta = new AtomicBoolean(false);
+        equipo = new Semaphore[3];
         mutex = new Semaphore(1);
-        equipo = new BlockingQueue[3];
         for (int i = 0; i < equipo.length; i++) {
-            equipo[i] = new ArrayBlockingQueue<String>(capacidades[i]);
-            this.ponerPartes(i);
+            equipo[i] = new Semaphore(capacidades[i]);
         }
         encargado = new Semaphore(0);
         revisar = new Semaphore(0);
@@ -45,34 +44,24 @@ public class RealidadVirtual implements Atraccion {
                 mutex.release();
 
                 // Intenta sacar un visor
-                String Visor = equipo[0].poll(2, TimeUnit.SECONDS);
-                if (Visor != null) {
+                if (equipo[0].tryAcquire(2, TimeUnit.SECONDS)) {
                     // Intenta sacar dos manoplas
-                    String manopla = equipo[1].poll(2, TimeUnit.SECONDS);
-                    String manopla2 = equipo[1].poll(2, TimeUnit.SECONDS);
-
-                    if (manopla != null && manopla2 != null) {
+                    if (equipo[1].tryAcquire(2, 2, TimeUnit.SECONDS)) {
                         // Intenta sacar una base
-                        String base = equipo[2].poll(2, TimeUnit.SECONDS);
-
-                        if (base != null) {
+                        if (equipo[2].tryAcquire(2, TimeUnit.SECONDS)) {
                             // Pudo sacar todo y espera ser revisado
                             entro = true;
                             this.esperarRevisar();
 
                         } else {
+
                             // No pudo y devuelve lo que saco
-                            equipo[0].put("Visor");
-                            equipo[1].put("manopla1");
-                            equipo[1].put("manopla2");
+                            equipo[0].release(1);
+                            equipo[1].release(2);
 
                         }
                     } else {
-                        equipo[0].put("Visor");
-                        // pudo haber agarrado alguno de los dos y devuelve uno solo
-                        if ((manopla != null && manopla2 == null) || (manopla == null && manopla2 != null)) {
-                            equipo[1].put("manopla");
-                        }
+                        equipo[0].release(1);
                     }
 
                 }
@@ -114,10 +103,9 @@ public class RealidadVirtual implements Atraccion {
     public void salir() {
         try {
             // Pone todo de nuevo
-            equipo[0].put("Visor");
-            equipo[1].put("manopla");
-            equipo[1].put("manopla2");
-            equipo[2].put("base");
+            equipo[0].release(1);
+            equipo[1].release(2);
+            equipo[2].release(1);
 
         } catch (Exception e) {
             System.out.println(e);
@@ -160,24 +148,6 @@ public class RealidadVirtual implements Atraccion {
         }
     }
 
-    // Se cargan las partes en la RV
-    public void ponerPartes(int i) {
-        try {
-            for (int j = 0; j < capacidades[i]; j++) {
-                if (i == 0) {
-
-                    equipo[i].put("Visor" + j);
-                } else if (i == 1) {
-                    equipo[i].put("Manopla" + j);
-                } else {
-                    equipo[i].put("Base" + j);
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
 
     @Override
     public void abrirActividad() {
