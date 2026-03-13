@@ -4,14 +4,15 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Mesa {
 
     private CyclicBarrier inicioComer;
-    private CyclicBarrier fin;
     private final int cantComer = 4;
     private AtomicInteger adentro;
+    private AtomicBoolean comiendo;
     private Semaphore mutex;
     private Semaphore mutexBarrera;
     private int Num;
@@ -20,13 +21,11 @@ public class Mesa {
         this.Num = Num;
         inicioComer = new CyclicBarrier(cantComer, () -> {
             System.out.println("Empiezan a comer en mesa " + Num);
+
         });
         mutex = new Semaphore(1);
         adentro = new AtomicInteger(0);
-        fin = new CyclicBarrier(cantComer, () -> {
-            System.out.println("Terminan de comer en mesa " + Num);
-            adentro.set(0);
-        });
+        comiendo = new AtomicBoolean(false);
         mutexBarrera = new Semaphore(1);
     }
 
@@ -49,7 +48,7 @@ public class Mesa {
                 entro = false;
             } catch (Exception r) {
                 System.out.println(r);
-            }finally{
+            } finally {
                 mutexBarrera.release();
             }
 
@@ -69,6 +68,9 @@ public class Mesa {
             if (!estanComiendo()) {
                 adentro.incrementAndGet();
                 reservo = true;
+                if (adentro.get() == cantComer) {
+                    comiendo.set(true);
+                }
             }
             mutex.release();
         } catch (Exception e) {
@@ -79,14 +81,18 @@ public class Mesa {
 
     public void salirMesa() {
         try {
-            fin.await();
-
+            mutex.acquire();
+            adentro.decrementAndGet();
+            if (adentro.get() == 0) {
+                comiendo.set(false);
+            }
+            mutex.release();
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
     public boolean estanComiendo() {
-        return adentro.get() == cantComer;
+        return comiendo.get();
     }
 }
