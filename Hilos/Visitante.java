@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import Objetos.*;
+import Recursos_Compartidos.CarreraGomones;
 import Recursos_Compartidos.Parque;
 
 public class Visitante extends Thread {
@@ -211,12 +212,16 @@ public class Visitante extends Thread {
     // metodo de esperar
 
     private void esperarTiempo(String actividad) { // esperan con respecto a la actividad elegida
+        boolean espera = true;
         try {
             if (actividad.equals("RV")) {
                 Thread.sleep(1500);
             } else if (actividad.equals("CG")) {
                 wri.escribir("El visitante esta yendo en la carrera ....");
-                Thread.sleep(3000);
+                espera = atraccion.preparar();
+                if (espera) {
+                    Thread.sleep(3000);
+                }
             } else if (actividad.equals("CO")) {
                 wri.escribir("El visitante come ....");
                 Thread.sleep(5000);

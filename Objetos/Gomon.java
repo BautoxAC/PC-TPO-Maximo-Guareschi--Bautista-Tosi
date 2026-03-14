@@ -1,5 +1,7 @@
 package Objetos;
 
+import java.util.concurrent.Semaphore;
+
 import Hilos.Visitante;
 
 public class Gomon {
@@ -10,15 +12,20 @@ public class Gomon {
     private Visitante conductor; // quien conduce
     private Visitante pasajero; // el pasajero si es doble
 
+    private Semaphore semaforoListo;
+
     public Gomon(Visitante conductor) { // constructor para gomon individual
         this.esDoble = false;
         this.conductor = conductor;
+
     }
 
     public Gomon(Visitante conductor, Visitante pasajero) { // constructor para gomon doble
         this.esDoble = true;
         this.conductor = conductor;
         this.pasajero = pasajero;
+
+        this.semaforoListo = new Semaphore(0);
     }
 
     public boolean esDoble() {
@@ -47,6 +54,18 @@ public class Gomon {
         }
 
         return retorno;
+    }
+
+    public void esperarConductor() {
+        try {
+            semaforoListo.acquire();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public void avisarPasajero() {
+        semaforoListo.release();
     }
 
 }

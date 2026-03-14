@@ -1,5 +1,4 @@
 package Objetos;
-import Hilos.Visitante;
 
 public class Bolso {
 
@@ -7,19 +6,20 @@ public class Bolso {
     // y es el hilo camioneta quien lo mueve hasta el otro lado
     // luego es obtenido por el mismo visitante que lo dejo
 
-    private int id;
-    private Visitante duenio;
+    private String duenio;
+    private int cosas;
 
-    public Bolso(int id, Visitante duenio) {
-        this.id = id;
+    public Bolso(String duenio, int cosas) {
         this.duenio = duenio;
+        this.cosas = cosas;
     }
 
-    public int obtenerId() {
-        return id;
-    }
-
-    public Visitante obtenerDuenio() {
+    public String obtenerDuenio() {
         return duenio;
     }
+
+    public int obtenerCosas() {
+        return cosas;
+    }
+
 }

@@ -1,5 +1,7 @@
 package Recursos_Compartidos;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,8 +21,11 @@ public class CarreraGomones implements Atraccion {
     private Semaphore gomonesDobles;
     private Semaphore gomonesListos;
 
+    private Semaphore bolsosListos;
+
     private Semaphore mutexBarrera;
     private Semaphore semaforoEntrada;
+    private Semaphore mutexLista;
 
     private int participantesCarrera;
     private int participantes;
@@ -28,8 +33,9 @@ public class CarreraGomones implements Atraccion {
 
     private CyclicBarrier trenBarrier; // barrera ciclica para el tren
 
-    private BlockingQueue<Bolso> bolsosEnViaje; // colas bloqueantes para los bolsos
-    private BlockingQueue<Bolso> bolsosEnFinal;
+    private List<Bolso> bolsosInicio;
+    private List<Bolso> bolsosEnCamioneta;
+    private ConcurrentHashMap<String, Bolso> bolsosFinal;
 
     private Exchanger<Visitante> exchangerDoble; // exchanger para determinar si hay o no gomon doble
 
@@ -46,6 +52,8 @@ public class CarreraGomones implements Atraccion {
         gomonesDobles = new Semaphore(GD);
         gomonesListos = new Semaphore(0);
 
+        bolsosListos = new Semaphore(0);
+
         semaforoEntrada = new Semaphore(0);
 
         participantesCarrera = 0;
@@ -57,13 +65,15 @@ public class CarreraGomones implements Atraccion {
 
         mutex = new Semaphore(1);
         mutexBarrera = new Semaphore(1);
+        mutexLista = new Semaphore(1);
 
         trenBarrier = new CyclicBarrier(15, () -> {
             System.out.println("TREN LLENO, va a la carrera");
         });
 
-        bolsosEnViaje = new LinkedBlockingQueue<>();
-        bolsosEnFinal = new LinkedBlockingQueue<>();
+        bolsosInicio = new ArrayList<>();
+        bolsosEnCamioneta = new ArrayList<>();
+        bolsosFinal = new ConcurrentHashMap<>();
 
         exchangerDoble = new Exchanger<>();
 
@@ -93,11 +103,16 @@ public class CarreraGomones implements Atraccion {
             mutex.acquire();
 
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
 
         }
 
         if (actividadAbierta && !actividadIniciada) {
+
+            System.out.println("Permisos de gomonesListos :" + gomonesListos.availablePermits());
+                    System.out.println("Permisos de gomonesDobles :" + gomonesDobles.availablePermits());
+                    System.out.println("Permisos de gomonesIndividuales :" + gomonesIndividuales.availablePermits());
+
 
             mutex.release();
 
@@ -144,9 +159,10 @@ public class CarreraGomones implements Atraccion {
 
                         esConductor = visitante == conductor;
 
+                    } catch (TimeoutException e) {
+                        gomonesDobles.release();
                     } catch (Exception r) {
                         System.out.println(r);
-                        gomonesDobles.release();
                     }
 
                 } else if (gomonesIndividuales.tryAcquire()) {
@@ -171,12 +187,13 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.release();
 
-                    if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un
-                                       // doble o de un individual
-                        gomonesListos.release();
-                    }
-
+                    
                     if (puedeCorrer) { // si puede correr pone su bolso y espera
+
+                        if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un
+                            // doble o de un individual
+                            gomonesListos.release();
+                        }
 
                         bolso = ponerBolso(visitante);
 
@@ -186,16 +203,30 @@ public class CarreraGomones implements Atraccion {
                             if (esConductor) {
                                 gomonesListos.acquire();
                             }
+
+                            System.out.println("se sale por EL TIEMPO");
+
                             gomonAgarrado = visitanteAGomon.remove(visitante);
-                            if (gomonAgarrado.esDoble()) {
-                                gomonesDobles.release();
-                            }else{
-                                gomonesIndividuales.release();
+
+                            if (gomonAgarrado != null) {
+
+                                pareja = gomonAgarrado.obtenerPareja(visitante);
+
+                                if (pareja != null) {
+                                    visitanteAGomon.remove(pareja);
+                                }
+
+                                if (gomonAgarrado.esDoble()) {
+                                    gomonesDobles.release();
+                                } else {
+                                    gomonesIndividuales.release();
+                                }
                             }
+
                             mutex.acquire();
                             participantes--;
                             mutex.release();
-                            retirarBolso(visitante);
+                            retirarBolsoInicio(visitante);
                         }
 
                         exito = true;
@@ -204,12 +235,12 @@ public class CarreraGomones implements Atraccion {
                 }
 
             } catch (Exception e) {
-                System.out.println("No se completó la carrera, se retira");
+                System.out.println("error en la carrera");
 
                 if (visitante != null && bolso != null) {
-                    retirarBolso(visitante);
+                    retirarBolsoInicio(visitante);
                 }
-                System.out.println(e);
+                e.printStackTrace();
             }
 
         } else {
@@ -236,10 +267,20 @@ public class CarreraGomones implements Atraccion {
 
                 // libera en base a si no es doble o bien es doble y es conductor
 
+                // if (!gomon.esDoble()) {
+                // gomonesIndividuales.release();
+                // } else if (gomon.esConductor(visitante)) {
+                // gomonesDobles.release(2);
+                // gomon.avisarPasajero();
+                // }
+
                 if (!gomon.esDoble()) {
                     gomonesIndividuales.release();
-                } else if (gomon.esConductor(visitante)) {
+                } else {
                     gomonesDobles.release();
+                    if (gomon.esConductor(visitante)) {
+                        gomon.avisarPasajero();
+                    }
                 }
 
                 if (hayGanador.compareAndSet(false, true)) {
@@ -263,7 +304,7 @@ public class CarreraGomones implements Atraccion {
                     }
                 }
 
-                retirarBolso(visitante);
+                retirarBolsoFin(visitante);
 
                 mutex.acquire();
                 llegados++;
@@ -287,8 +328,27 @@ public class CarreraGomones implements Atraccion {
             }
 
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
+    }
+
+    public boolean verificarPasajero() {
+
+        boolean espera = true;
+        Visitante visitante = (Visitante) Thread.currentThread();
+        Gomon gomon = visitanteAGomon.get(visitante);
+
+        if (gomon != null) {
+
+            if (gomon.esDoble() && !gomon.esConductor(visitante)) {
+                gomon.esperarConductor();
+                espera = false;
+            }
+
+        }
+
+        return espera;
+
     }
 
     // metodos privados del recurso compartido
@@ -306,7 +366,7 @@ public class CarreraGomones implements Atraccion {
                 System.out.println("Tren no se lleno o hubo un problema, va en bici");
                 llegarEnBici();
             } catch (Exception e) {
-                System.out.println(e);
+                e.printStackTrace();
             } finally {
                 mutexBarrera.release();
 
@@ -324,51 +384,138 @@ public class CarreraGomones implements Atraccion {
     }
 
     private Bolso ponerBolso(Visitante visitante) {
-        Bolso bolso = new Bolso(new Random().nextInt(1000), visitante); // se crea un bolso al azar por cada visitante
+        Bolso bolso = new Bolso(visitante.obtenerNombre(), new Random().nextInt(60)); // se crea un bolso al azar por
+                                                                                      // cada visitante
 
         try {
-            bolsosEnViaje.put(bolso); // se pone en la cola
-            System.out.println("Bolso " + bolso.obtenerId() + " enviado del visitante " + visitante.obtenerNombre());
+            mutexLista.acquire();
+            bolsosInicio.add(bolso); // se pone en la lista
+            mutexLista.release();
+            System.out.println("Se deja el bolso del visitante " + bolso.obtenerDuenio() + " con "
+                    + bolso.obtenerCosas() + " cosas");
         } catch (InterruptedException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
         return bolso;
     }
 
-    private void retirarBolso(Visitante visitante) {
+    private void retirarBolsoInicio(Visitante visitante) {
 
-        boolean encontrado = false;
+        Bolso encontrado = null;
+        int i = 0;
 
-        while (!encontrado) { // cicla hasta encontrar el bolso
-            try {
-                Bolso bolso = bolsosEnFinal.take();
+        try {
+            mutexLista.acquire();
 
-                if (bolso.obtenerDuenio() == visitante) { // si lo encuentra, frena y se lo lleva
+            while (encontrado == null && i < bolsosInicio.size()) { // cicla hasta encontrar el bolso
+
+                Bolso bolso = bolsosInicio.get(i);
+
+                if (bolso.obtenerDuenio().equals(visitante.obtenerNombre())) { // si lo encuentra, frena y se lo
+                                                                               // lleva
                     System.out.println(
-                            "Visitante " + visitante.obtenerNombre() + " retira su bolso " + bolso.obtenerId());
-                    encontrado = true;
-                } else {
-                    bolsosEnFinal.put(bolso); // si no lo encuentra lo devuelve
+                            "Visitante " + visitante.obtenerNombre()
+                                    + " retira su bolso con la siguiente cantidad de cosas: "
+                                    + bolso.obtenerCosas());
+                    encontrado = bolso;
                 }
 
-            } catch (InterruptedException e) {
-                System.out.println(e);
+                i++;
+
             }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            mutexLista.release();
         }
+
+        if (encontrado != null) {
+            bolsosInicio.remove(encontrado);
+            System.out.println("El visitante " + visitante.obtenerNombre() + " retiro su bolso con "
+                    + encontrado.obtenerCosas() + " cosas");
+        }
+
     }
 
-    // metodo que hace el hilo camioneta
+    private void retirarBolsoFin(Visitante visitante) {
 
-    public void transportarBolso() {
-        Bolso bolso;
+        Bolso encontrado = null;
+
         try {
-            bolso = bolsosEnViaje.take();
-            bolsosEnFinal.put(bolso);
-            System.out.println("Bolso " + bolso.obtenerId() + " llego al final");
-        } catch (InterruptedException e) {
-            System.out.println(e);
+
+            mutexLista.acquire();
+
+            encontrado = bolsosFinal.remove(visitante.obtenerNombre());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mutexLista.release();
         }
+
+        if (encontrado != null) {
+
+            System.out.println("El visitante " + visitante.obtenerNombre() + " retiro su bolso con "
+                    + encontrado.obtenerCosas() + " cosas");
+
+        }
+
+    }
+
+    // metodos que hace el hilo camioneta
+
+    public void esperarBolsos() {
+
+        try {
+
+            bolsosListos.acquire();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void subirBolsos() {
+
+        try {
+
+            mutexLista.acquire();
+
+            for (Bolso bolso : bolsosInicio) {
+                bolsosEnCamioneta.add(bolso);
+            }
+
+            bolsosInicio.clear();
+
+            mutexLista.release();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void dejarBolsos() {
+
+        try {
+
+            mutexLista.acquire();
+
+            for (Bolso bolso : bolsosEnCamioneta) {
+                bolsosFinal.put(bolso.obtenerDuenio(), bolso);
+            }
+
+            bolsosEnCamioneta.clear();
+
+            mutexLista.release();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     // metodo que hace el hilo encargado carrera gomones
@@ -381,6 +528,8 @@ public class CarreraGomones implements Atraccion {
 
             gomonesListos.acquire(GOMONES_PARA_LARGAR);
 
+            bolsosListos.release();
+
             mutex.acquire();
             actividadIniciada = true;
             participantesCarrera = participantes;
@@ -391,7 +540,7 @@ public class CarreraGomones implements Atraccion {
             semaforoEntrada.release(participantesCarrera);
 
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
     }
@@ -402,7 +551,7 @@ public class CarreraGomones implements Atraccion {
         try {
             mutex.acquire();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         actividadAbierta = false;
         mutex.release();
@@ -415,7 +564,7 @@ public class CarreraGomones implements Atraccion {
             abierta = actividadAbierta;
             mutex.release();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         return abierta;
     }
@@ -428,9 +577,14 @@ public class CarreraGomones implements Atraccion {
         try {
             mutex.acquire();
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
         actividadAbierta = true;
         mutex.release();
     }
+
+    public boolean preparar() {
+        return verificarPasajero();
+    }
+
 }

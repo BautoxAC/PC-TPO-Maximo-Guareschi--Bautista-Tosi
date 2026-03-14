@@ -18,15 +18,22 @@ public class Camioneta implements Runnable {
 
             System.out.println("la camioneta espera los bolsos");
 
-            carrera.transportarBolso(); // se bloquea esperando un bolso
+            carrera.esperarBolsos();
 
-            System.out.println("la camioneta transporta los bolsos");
+            System.out.println("la camioneta sube los bolsos");
+
+            carrera.subirBolsos();
+
+            System.out.println("la camioneta termino de subir los bolsos, va hacia el final");
 
             try {
-                Thread.sleep(700);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 System.out.println(e);
             }
+
+            carrera.dejarBolsos();
+
         }
 
         

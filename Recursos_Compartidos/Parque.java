@@ -58,6 +58,9 @@ public class Parque {
         EncargadoTeatro encargadoTeatro  = new EncargadoTeatro((Teatro)atracciones[5]);
         new Thread(encargadoTeatro).start();
 
+        EncargadoCarreraGomones encargadoGomones = new EncargadoCarreraGomones((CarreraGomones) atracciones[3]);
+        new Thread(encargadoGomones).start();
+
     }
 
     // metodos que hace el visitante a la hora de entrar al parque

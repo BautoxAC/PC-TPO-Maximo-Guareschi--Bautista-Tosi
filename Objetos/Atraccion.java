@@ -18,4 +18,9 @@ public interface Atraccion {
 
     public String obtenerTipoFichas();
 
+    default boolean preparar() {
+        return true;
+        // para comportamiento adicional de recursos compartidos especificos (carrera gomones)
+    }
+
 }
