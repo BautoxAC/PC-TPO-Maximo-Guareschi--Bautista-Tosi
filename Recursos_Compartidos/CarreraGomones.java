@@ -99,6 +99,9 @@ public class CarreraGomones implements Atraccion {
         Visitante conductor;
         Visitante pasajero;
 
+        boolean tomoInvidual = false;
+        boolean tomoDoble = false;
+
         try {
             mutex.acquire();
 
@@ -108,11 +111,6 @@ public class CarreraGomones implements Atraccion {
         }
 
         if (actividadAbierta && !actividadIniciada) {
-
-            System.out.println("Permisos de gomonesListos :" + gomonesListos.availablePermits());
-                    System.out.println("Permisos de gomonesDobles :" + gomonesDobles.availablePermits());
-                    System.out.println("Permisos de gomonesIndividuales :" + gomonesIndividuales.availablePermits());
-
 
             mutex.release();
 
@@ -158,6 +156,7 @@ public class CarreraGomones implements Atraccion {
                         }
 
                         esConductor = visitante == conductor;
+                        tomoDoble = true;
 
                     } catch (TimeoutException e) {
                         gomonesDobles.release();
@@ -169,6 +168,7 @@ public class CarreraGomones implements Atraccion {
                     gomon = new Gomon(visitante);
                     visitanteAGomon.put(visitante, gomon);
                     esConductor = true;
+                    tomoInvidual = true;
                 } else {
                     System.out.println("No hay gomones disponibles");
                 }
@@ -187,7 +187,6 @@ public class CarreraGomones implements Atraccion {
 
                     mutex.release();
 
-                    
                     if (puedeCorrer) { // si puede correr pone su bolso y espera
 
                         if (esConductor) { // solo si maneja un gomon cuenta gomones listos, es decir si es dueño de un
@@ -204,7 +203,7 @@ public class CarreraGomones implements Atraccion {
                                 gomonesListos.acquire();
                             }
 
-                            System.out.println("se sale por EL TIEMPO");
+                            System.out.println("Se sale un visitante de los gomones por que espero mucho");
 
                             gomonAgarrado = visitanteAGomon.remove(visitante);
 
@@ -217,7 +216,8 @@ public class CarreraGomones implements Atraccion {
                                 }
 
                                 if (gomonAgarrado.esDoble()) {
-                                    gomonesDobles.release();
+                                    gomonAgarrado.avisarPasajero();
+                                    gomonesDobles.release(2);
                                 } else {
                                     gomonesIndividuales.release();
                                 }
@@ -227,10 +227,20 @@ public class CarreraGomones implements Atraccion {
                             participantes--;
                             mutex.release();
                             retirarBolsoInicio(visitante);
+
+                        } else {
+                            exito = true;
                         }
 
-                        exito = true;
+                        
+                    } else {
+                        
+                        limpiarPermisos(visitante, tomoInvidual, tomoDoble);
                     }
+
+                } else {
+
+                    limpiarPermisos(visitante, tomoInvidual, tomoDoble);
 
                 }
 
@@ -319,9 +329,11 @@ public class CarreraGomones implements Atraccion {
                     participantesCarrera = 0;
                     actividadIniciada = false;
                     hayGanador.set(false);
-                    visitanteAGomon.clear();
+                   // visitanteAGomon.clear();
 
                 }
+
+                visitanteAGomon.remove(visitante);
 
                 mutex.release();
 
@@ -352,6 +364,21 @@ public class CarreraGomones implements Atraccion {
     }
 
     // metodos privados del recurso compartido
+
+    private void limpiarPermisos(Visitante visitante, boolean individual, boolean doble) {
+
+        visitanteAGomon.remove(visitante);
+
+        if (individual) {
+            System.out.println("Tenia INDIVIDUAL, lo devuelve");
+            gomonesIndividuales.release();
+        }
+        if (doble) {
+            System.out.println("Tenia DOBLE, lo devuelve");
+            gomonesDobles.release();
+        }
+
+    }
 
     private void llegarEnTren() {
         // metodo que maneja la llegada en tren
@@ -417,7 +444,7 @@ public class CarreraGomones implements Atraccion {
                     System.out.println(
                             "Visitante " + visitante.obtenerNombre()
                                     + " retira su bolso con la siguiente cantidad de cosas: "
-                                    + bolso.obtenerCosas());
+                                    + bolso.obtenerCosas() + "en el inicio");
                     encontrado = bolso;
                 }
 
@@ -458,7 +485,7 @@ public class CarreraGomones implements Atraccion {
         if (encontrado != null) {
 
             System.out.println("El visitante " + visitante.obtenerNombre() + " retiro su bolso con "
-                    + encontrado.obtenerCosas() + " cosas");
+                    + encontrado.obtenerCosas() + " cosas, en el final");
 
         }
 

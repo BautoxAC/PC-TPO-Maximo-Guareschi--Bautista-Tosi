@@ -1,14 +1,8 @@
 package Hilos;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.io.IOException;
 import java.util.Random;
 
 import Objetos.*;
-import Recursos_Compartidos.CarreraGomones;
 import Recursos_Compartidos.Parque;
 
 public class Visitante extends Thread {
@@ -181,7 +175,7 @@ public class Visitante extends Thread {
 
                     if (resultado) {
                         wri.escribir(nombre + " ENTRO Y ESPERA salir de actividad " + actividad);
-                        this.esperarTiempo(actividad);
+                        esperarTiempo(actividad);
                         atraccion.salir();
 
                         agregarFicha(atraccion.obtenerTipoFichas());
@@ -220,8 +214,12 @@ public class Visitante extends Thread {
                 wri.escribir("El visitante esta yendo en la carrera ....");
                 espera = atraccion.preparar();
                 if (espera) {
+                    System.out.println("El visitante "+nombre+" es el conductor, empieza a remar");
                     Thread.sleep(3000);
+                } else {
+                    System.out.println("El visitante "+nombre+" ES UN PASAJERO, ya termino el conductor y el salio");
                 }
+                
             } else if (actividad.equals("CO")) {
                 wri.escribir("El visitante come ....");
                 Thread.sleep(5000);

@@ -58,6 +58,7 @@ public class Gomon {
 
     public void esperarConductor() {
         try {
+            System.out.println("El visitante "+pasajero.obtenerNombre()+" ESPERA AL CONDUCTOR");
             semaforoListo.acquire();
         } catch (Exception e) {
             System.out.println(e);
